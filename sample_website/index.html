@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA In the loop - D.Willems</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        h2 {
+            color: #3498db;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+        }
+        select, input[type="checkbox"] {
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .success-message {
+            text-align: center;
+            font-size: 24px;
+            color: #27ae60;
+            margin-top: 50px;
+        }
+        .button-group {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="main-title">QA In The Loop</h1>
+    <h2 id="subtitle1">Automatisez-moi</h2>
+    <h2 id="subtitle2">Deuxième sous-titre</h2>
+    
+    <form id="main-form">
+        <div class="form-group">
+            <label for="text1">Premier champ texte:</label>
+            <input type="text" id="text1" name="text1" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="textarea2">Deuxième champ texte:</label>
+            <textarea id="textarea2" name="textarea2"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <input type="checkbox" id="checkbox1" name="checkbox1">
+            <label for="checkbox1" style="display: inline;">J'accepte les conditions</label>
+        </div>
+        
+        <div class="form-group">
+            <label for="dropdown">Liste déroulante:</label>
+            <select id="dropdown" name="dropdown">
+                <option value="">-- Sélectionnez une option --</option>
+                <option value="1">Option 1</option>
+                <option value="2">Option 2</option>
+                <option value="3">Option 3</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Liste d'options:</label>
+            <div>
+                <input type="radio" id="option1" name="options" value="1" checked>
+                <label for="option1" style="display: inline;">Option A</label>
+            </div>
+            <div>
+                <input type="radio" id="option2" name="options" value="2">
+                <label for="option2" style="display: inline;">Option B</label>
+            </div>
+            <div>
+                <input type="radio" id="option3" name="options" value="3">
+                <label for="option3" style="display: inline;">Option C</label>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button type="submit">Soumettre</button>
+            <button type="button" id="change-h2-dropdown">Modifier H2 avec liste déroulante</button>
+            <button type="button" id="change-h2-radio">Modifier H2 avec boutons radio</button>
+            <button type="button" id="change-title-btn">Change le titre</button>
+        </div>
+    </form>
+    <h5>Page d'entraînement pour l'automatisation GUI Web - D.Willems - 06/2025</h5>
+    
+    <script>
+        // Gestion du formulaire
+        document.getElementById('main-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Remplacer tout le contenu de la page par un message de succès
+            document.body.innerHTML = '<div class="success-message">Formulaire soumis avec succès !</div>';
+        });
+        
+        // Gestion du bouton "Change le titre"
+        document.getElementById('change-title-btn').addEventListener('click', function() {
+            const title = document.getElementById('main-title');
+            const originalText = title.textContent;
+            
+            // Afficher "Loading..."
+            title.textContent = "Loading...";
+            
+            // Après 5 secondes, changer le titre
+            setTimeout(function() {
+                title.textContent = "Nouveau titre après chargement";
+            }, 5000);
+        });
+        
+        // Modifier le premier h2 selon la liste déroulante
+        document.getElementById('change-h2-dropdown').addEventListener('click', function() {
+            const dropdown = document.getElementById('dropdown');
+            const selectedOption = dropdown.options[dropdown.selectedIndex];
+            
+            if (selectedOption.value) {
+                document.getElementById('subtitle1').textContent = 
+                    `Sous-titre modifié par liste déroulante: ${selectedOption.text}`;
+            } else {
+                document.getElementById('subtitle1').textContent = 
+                    "Veuillez sélectionner une option dans la liste";
+            }
+        });
+        
+        // Modifier le deuxième h2 selon les boutons radio
+        document.getElementById('change-h2-radio').addEventListener('click', function() {
+            const selectedRadio = document.querySelector('input[name="options"]:checked');
+            
+            if (selectedRadio) {
+                const label = document.querySelector(`label[for="${selectedRadio.id}"]`).textContent;
+                document.getElementById('subtitle2').textContent = 
+                    `Sous-titre modifié par bouton radio: ${label}`;
+            }
+        });
+    </script>
+</body>
+</html>

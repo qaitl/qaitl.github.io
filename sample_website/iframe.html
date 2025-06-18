@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iframe Demonstration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .iframe-container {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+        }
+        .controls {
+            margin: 10px 0;
+        }
+        button {
+            padding: 8px 12px;
+            margin-right: 5px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h1>iframe Demonstration</h1>
+    
+    <p>This page shows how to use the &lt;iframe&gt; element to embed external content.</p>
+    
+    <div class="controls">
+        <button onclick="loadWikipedia()">Load Wikipedia</button>
+        <button onclick="loadYouTube()">Load YouTube</button>
+        <button onclick="loadMaps()">Load Google Maps</button>
+        <button onclick="emptyIframe()">Empty iframe</button>
+    </div>
+    
+    <div class="iframe-container">
+        <iframe id="demoFrame" title="Demo iframe" src="index.html" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen></iframe>
+    </div>
+    
+    <h2>About iframes</h2>
+    <p>An iframe (inline frame) is an HTML document embedded inside another HTML document. It's commonly used to:</p>
+    <ul>
+        <li>Embed videos, maps, or other media</li>
+        <li>Include content from other websites</li>
+        <li>Create isolated environments for plugins or widgets</li>
+    </ul>
+    
+    <script>
+        function loadWikipedia() {
+            document.getElementById('demoFrame').src = 'https://en.wikipedia.org/wiki/HTML';
+        }
+        
+        function loadYouTube() {
+            document.getElementById('demoFrame').src = 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+        }
+        
+        function loadMaps() {
+            document.getElementById('demoFrame').src = 'https://maps.google.com/maps?q=eiffel+tower&output=embed';
+        }
+        
+        function emptyIframe() {
+            document.getElementById('demoFrame').src = 'about:blank';
+        }
+    </script>
+</body>
+</html>
