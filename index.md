@@ -1,2 +1,5 @@
-# QA In The Loop
-[https://qaitl.github.io/sample_website/](Sample Website)
+---
+title:  "[QAITL] Home"
+---
+# QA In The Loop 💫
+[Sample Website](https://qaitl.github.io/sample_website/)
