@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Janky shop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            width: 1200px; /* Fixe la largeur pour rendre non-responsive */
+        }
+        .products {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .product {
+            border: 1px solid #ddd;
+            padding: 15px;
+            width: 250px;
+        }
+        .cart {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f5f5f5;
+            padding: 15px;
+            border: 1px solid #ccc;
+        }
+        button {
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border: 1px solid #333;
+            z-index: 100;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 99;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .remove-item {
+            color: red;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ma boutique foireuse</h1>
+    <p>Ce site contient des bug intentionnels pour illustrer les tests exploratoires</p>
+
+    <div class="products">
+        <div class="product">
+            <h3>Produit A</h3>
+            <p>Prix: 10€</p>
+            <button onclick="addToCart('Produit A', 10)">Ajouter au panier</button>
+        </div>
+        <div class="product">
+            <h3>Produit B</h3>
+            <p>Prix: €15</p>
+            <button onclick="addToCart('Produit B', 15)">Ajouter au panier</button>
+        </div>
+        <div class="product">
+            <h3>produit C</h3>
+            <p>Prix: 20€</p>
+            <button onclick="addToCart('Produit C', 20)">Ajouter au panier</button>
+        </div>
+    </div>
+
+    <div class="cart">
+        <h2>Panier</h2>
+        <div id="cart-items"></div>
+        <p>Total: <span id="cart-total">0</span>€</p>
+        <button onclick="checkout()">Validé le panier</button>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay"></div>
+    <div class="modal" id="modal">
+        <h2>Merci pour votre commande</h2>
+        <p>Ce site étant une simulation, vous ne recevrez rien du tout.</p>
+        <button onclick="closeModal()">Fermer</button>
+    </div>
+
+    <script>
+        let cart = [];
+        let total = 0;
+
+        // Empêcher le zoom
+        document.addEventListener('wheel', function(e) {
+            if (e.ctrlKey) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Désactiver le bouton retour
+        window.onpopstate = function(event) {
+            // Ne rien faire pour bloquer le retour
+        };
+
+        function addToCart(name, price) {
+            // Bug: Limite à 10 articles
+            if (cart.length >= 10) {
+                alert("Error 500: Voracious customer detected");
+                return;
+            }
+
+            cart.push({ name, price, id: Date.now() });
+            
+            // Bug: Calcul incorrect du total (ne compte pas le dernier article)
+            total = cart.reduce((sum, item, index) => {
+                if (index < cart.length - 1) {
+                    return sum + item.price;
+                }
+                return sum;
+            }, 0);
+            
+            updateCartDisplay();
+        }
+
+        function removeFromCart(id) {
+            // Bug: Supprime toujours le premier article au lieu de celui demandé
+            cart = cart.filter(item => item.id !== id);
+            
+            // Bug: Le total n'est pas recalculé après suppression
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cart-items');
+            cartItems.innerHTML = '';
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p>Votre panier est vide</p>';
+                document.getElementById('cart-total').textContent = '0';
+                return;
+            }
+            
+            cart.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'cart-item';
+                itemElement.innerHTML = `
+                    <span>${item.name} - ${item.price}€</span>
+                    <span class="remove-item" onclick="removeFromCart(${item.id})">×</span>
+                `;
+                cartItems.appendChild(itemElement);
+            });
+            
+            document.getElementById('cart-total').textContent = total;
+        }
+
+        function checkout() {
+            document.getElementById('modal-overlay').style.display = 'block';
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').style.display = 'none';
+            document.getElementById('modal').style.display = 'none';
+            // Bug: Ne pas vider le panier après validation
+        }
+
+        // Bug: Pas de sauvegarde du panier, il se vide au rafraîchissement
+    </script>
+</body>
+</html>
