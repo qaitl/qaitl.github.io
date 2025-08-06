@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
+    <script>
+        const api_key="WHY-DO-Y0U-R0B-BANKS??__B3CAUSE-TH@T'S-WH3RE-M0NEY-1S"
+    </script>
     <!------------------------------ 
     
     Es-tu un hacker, ou juste curieux ?
 
-    Bon réflexe de vérifier le code source, des informations intéressantes peuvent s'y trouver, en particulier sur les risques de sécurité.
+    Bon réflexe de vérifier le code source, des informations intéressantes peuvent s'y trouver, et parfois même des failles de sécurité.
 
-    Cependant, ce site étant une simulation, ne tiens donc pas compte de ce que tu pourrais trouver dans les sources.
+    Cependant, ce site étant une simulation, ne tiens donc pas compte de ce que tu pourrais trouver ci-dessous.
 
     -------------------------------->
 <head>
@@ -14,6 +17,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Janky shop</title>
     <style>
+
+
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -77,7 +83,7 @@
 </head>
 <body>
     <h1>Janky Shop - Ma boutique foireuse</h1>
-    <p>Ce site contient des bug intentionnels pour illustrer les tests exploratoires</p>
+    <p>Ce site contient des bug intentionnels, à vous de les détecter !</p>
 
     <div class="products">
         <div class="product">
@@ -118,11 +124,34 @@
         let total = 0;
 
         // Empêcher le zoom
-        document.addEventListener('wheel', function(e) {
-            if (e.ctrlKey) {
+        document.addEventListener('wheel', blockZoom, { passive: false });
+        document.addEventListener('keydown', blockZoom);
+        document.addEventListener('gesturestart', blockZoom);
+        document.addEventListener('dblclick', blockZoom);
+
+        function blockZoom(e) {
+            // Bloque Ctrl + +/-/0 (zoom clavier)
+            if (e.ctrlKey || e.metaKey || e.key === '+' || e.key === '-' || e.key === '0') {
                 e.preventDefault();
             }
-        }, { passive: false });
+            // Bloque la molette + Ctrl
+            if (e.type === 'wheel' && e.ctrlKey) {
+                e.preventDefault();
+            }
+            // Bloque le double-tap (mobile)
+            if (e.type === 'dblclick') {
+                e.preventDefault();
+            }
+            // Bloque le pinch-zoom (gesturestart sur iOS/Android)
+            if (e.type === 'gesturestart') {
+                e.preventDefault();
+            }
+        }
+
+        // Force le redimensionnement initial (au cas où)
+        window.onload = function() {
+            document.body.style.zoom = "100%";
+        };
 
         // Désactiver le bouton retour
         window.onpopstate = function(event) {
@@ -150,8 +179,11 @@
         }
 
         function removeFromCart(id) {
-            // Bug: Supprime toujours le premier article au lieu de celui demandé
-            cart = cart.filter(item => item.id !== id);
+            // cart = cart.filter(item => item.id !== id);
+
+            // INTENTIONAL BUG: Always removes the FIRST item instead of the selected one
+            cart.pop(); // Remove first item regardless of 'id'
+
             
             // Bug: Le total n'est pas recalculé après suppression
             updateCartDisplay();

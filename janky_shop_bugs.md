@@ -13,7 +13,7 @@ Prenez chacun un ou deux rôle(s) parmi ceux-ci:
 - le hacker: cherche avant tout à détourner le système ou trouver des infos privées, et pourquoi pas obtenir des produits gratos
 - Gilbert Collinet: son défi quotidien est d'utiliser un ordinateur comme tout le monde, malgré ses divers handicaps
 - le Prof: tout doit être précisément énoncé et correctement formulé
-- l'hyper connecté: téléphone ipad smartwatch lunettes connectées et eToaster: tout est bon pôur accéder au web
+- l'hyper connecté: téléphone ipad smartwatch lunettes connectées et eToaster: tout est bon pour accéder au web
 
 
 # Liste des bugs intentionnels
@@ -28,5 +28,9 @@ Prenez chacun un ou deux rôle(s) parmi ceux-ci:
 - Accessibilité réduite
 - Expérience mobile médiocre
 - Suppression du mauvais article
+- Suppression impossible sans souris
 - Total non recalculé après suppression
 - page /admin non protégée
+- API Key en clair dans le code source
+- possible de valider une commande vide
+
