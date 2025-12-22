@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de Test - Atelier Robot Framework</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="password"],
+        input[type="date"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .checkbox-group,
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item,
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="checkbox"],
+        input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 12px;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-label:hover {
+            background: #e9ecef;
+            border-color: #4CAF50;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .invalid {
+            border-color: #e74c3c !important;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1) !important;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-cancel {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #ddd;
+        }
+
+        .btn-cancel:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .summary-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .summary-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .modal-content {
+                margin: 20px;
+                width: calc(100% - 40px);
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Formulaire de Test</h1>
+            <p>Atelier d'automatisation web avec Robot Framework</p>
+        </div>
+        
+        <div class="form-container">
+            <form id="testForm" novalidate>
+                <!-- Section Informations personnelles -->
+                <div class="form-section">
+                    <h3 class="section-title">Informations personnelles</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nom">Nom <span class="required">*</span></label>
+                            <input type="text" id="nom" name="nom" required>
+                            <div class="error" id="error-nom">Le nom est requis</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="prenom">Prénom <span class="required">*</span></label>
+                            <input type="text" id="prenom" name="prenom" required>
+                            <div class="error" id="error-prenom">Le prénom est requis</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email <span class="required">*</span></label>
+                            <input type="email" id="email" name="email" required>
+                            <div class="error" id="error-email">Un email valide est requis</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="telephone">Téléphone</label>
+                            <input type="tel" id="telephone" name="telephone">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateNaissance">Date de naissance</label>
+                            <input type="date" id="dateNaissance" name="dateNaissance">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="age">Âge</label>
+                            <input type="number" id="age" name="age" min="0" max="120">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Informations professionnelles -->
+                <div class="form-section">
+                    <h3 class="section-title">Informations professionnelles</h3>
+                    
+                    <div class="form-group">
+                        <label for="entreprise">Entreprise</label>
+                        <input type="text" id="entreprise" name="entreprise">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="poste">Poste</label>
+                            <select id="poste" name="poste">
+                                <option value="">Sélectionnez un poste</option>
+                                <option value="developpeur">Développeur</option>
+                                <option value="testeur">Testeur</option>
+                                <option value="chef-projet">Chef de projet</option>
+                                <option value="analyste">Analyste</option>
+                                <option value="consultant">Consultant</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="experience">Années d'expérience</label>
+                            <select id="experience" name="experience">
+                                <option value="">Sélectionnez</option>
+                                <option value="0-1">0-1 an</option>
+                                <option value="2-5">2-5 ans</option>
+                                <option value="6-10">6-10 ans</option>
+                                <option value="11+">Plus de 10 ans</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Préférences -->
+                <div class="form-section">
+                    <h3 class="section-title">Préférences et centres d'intérêt</h3>
+                    
+                    <div class="form-group">
+                        <label>Langages de programmation maîtrisés</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="python" name="langages" value="python">
+                                <label for="python">Python</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="javascript" name="langages" value="javascript">
+                                <label for="javascript">JavaScript</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="java" name="langages" value="java">
+                                <label for="java">Java</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="csharp" name="langages" value="csharp">
+                                <label for="csharp">C#</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="php" name="langages" value="php">
+                                <label for="php">PHP</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Niveau en automatisation de tests <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" id="debutant" name="niveau" value="debutant" required>
+                                <label for="debutant">Débutant</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="intermediaire" name="niveau" value="intermediaire">
+                                <label for="intermediaire">Intermédiaire</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="avance" name="niveau" value="avance">
+                                <label for="avance">Avancé</label>
+                            </div>
+                        </div>
+                        <div class="error" id="error-niveau">Veuillez sélectionner votre niveau</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="motivation">Qu'est-ce qui vous motive dans l'automatisation des tests ?</label>
+                        <textarea id="motivation" name="motivation" placeholder="Décrivez vos motivations..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Section Upload -->
+                <div class="form-section">
+                    <h3 class="section-title">Documents</h3>
+                    
+                    <div class="form-group">
+                        <label for="cv">CV (PDF, DOC)</label>
+                        <div class="file-upload">
+                            <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx">
+                            <label for="cv" class="file-upload-label">
+                                Cliquez pour sélectionner un fichier ou glissez-déposez
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Conditions -->
+                <div class="form-section">
+                    <h3 class="section-title">Conditions générales</h3>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="newsletter" name="newsletter" value="oui">
+                            <label for="newsletter">Je souhaite recevoir la newsletter</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="conditions" name="conditions" value="accepte" required>
+                            <label for="conditions">J'accepte les conditions générales d'utilisation <span class="required">*</span></label>
+                        </div>
+                        <div class="error" id="error-conditions">Vous devez accepter les conditions générales</div>
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button type="button" class="btn-cancel" id="btnAnnuler">Annuler</button>
+                    <button type="submit" class="btn-submit" id="btnEnvoyer">Envoyer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de résumé -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Résumé du formulaire</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div id="modalBody">
+                <!-- Le contenu sera généré par JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Éléments du DOM
+        const form = document.getElementById('testForm');
+        const modal = document.getElementById('modal');
+        const closeModal = document.querySelector('.close');
+        const btnAnnuler = document.getElementById('btnAnnuler');
+        const btnEnvoyer = document.getElementById('btnEnvoyer');
+
+        // Fonction de validation
+        function validateField(field) {
+            const fieldName = field.name;
+            const errorElement = document.getElementById(`error-${fieldName}`);
+            let isValid = true;
+
+            // Supprimer les classes d'erreur existantes
+            field.classList.remove('invalid');
+            if (errorElement) {
+                errorElement.style.display = 'none';
+            }
+
+            if (field.required && !field.value.trim()) {
+                isValid = false;
+            }
+
+            // Validation spécifique pour l'email
+            if (field.type === 'email' && field.value) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(field.value)) {
+                    isValid = false;
+                }
+            }
+
+            // Validation pour les groupes de radio buttons
+            if (field.type === 'radio' && field.required) {
+                const radioGroup = document.querySelectorAll(`input[name="${fieldName}"]`);
+                isValid = Array.from(radioGroup).some(radio => radio.checked);
+            }
+
+            // Validation pour les checkboxes requises
+            if (field.type === 'checkbox' && field.required && !field.checked) {
+                isValid = false;
+            }
+
+            if (!isValid) {
+                field.classList.add('invalid');
+                if (errorElement) {
+                    errorElement.style.display = 'block';
+                }
+            }
+
+            return isValid;
+        }
+
+        // Fonction de validation complète du formulaire
+        function validateForm() {
+            let isFormValid = true;
+            const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+            
+            requiredFields.forEach(field => {
+                if (!validateField(field)) {
+                    isFormValid = false;
+                }
+            });
+
+            // Validation spéciale pour les groupes de radio
+            const radioGroups = {};
+            const radioButtons = form.querySelectorAll('input[type="radio"][required]');
+            radioButtons.forEach(radio => {
+                if (!radioGroups[radio.name]) {
+                    radioGroups[radio.name] = [];
+                }
+                radioGroups[radio.name].push(radio);
+            });
+
+            Object.keys(radioGroups).forEach(groupName => {
+                const isChecked = radioGroups[groupName].some(radio => radio.checked);
+                if (!isChecked) {
+                    radioGroups[groupName].forEach(radio => radio.classList.add('invalid'));
+                    const errorElement = document.getElementById(`error-${groupName}`);
+                    if (errorElement) {
+                        errorElement.style.display = 'block';
+                    }
+                    isFormValid = false;
+                } else {
+                    radioGroups[groupName].forEach(radio => radio.classList.remove('invalid'));
+                    const errorElement = document.getElementById(`error-${groupName}`);
+                    if (errorElement) {
+                        errorElement.style.display = 'none';
+                    }
+                }
+            });
+
+            return isFormValid;
+        }
+
+        // Fonction pour réinitialiser le formulaire
+        function resetForm() {
+            form.reset();
+            // Supprimer toutes les classes d'erreur
+            const invalidFields = form.querySelectorAll('.invalid');
+            invalidFields.forEach(field => field.classList.remove('invalid'));
+            
+            const errorMessages = form.querySelectorAll('.error');
+            errorMessages.forEach(error => error.style.display = 'none');
+            
+            // Réinitialiser le label du fichier
+            const fileLabel = document.querySelector('.file-upload-label');
+            fileLabel.textContent = 'Cliquez pour sélectionner un fichier ou glissez-déposez';
+        }
+
+        // Fonction pour générer le résumé
+        function generateSummary() {
+            const formData = new FormData(form);
+            const modalBody = document.getElementById('modalBody');
+            let summaryHTML = '';
+
+            // Récupérer toutes les données du formulaire
+            const data = {};
+            
+            // Champs texte simples
+            ['nom', 'prenom', 'email', 'telephone', 'dateNaissance', 'age', 'entreprise', 'poste', 'experience', 'motivation'].forEach(field => {
+                const value = formData.get(field);
+                if (value) data[field] = value;
+            });
+
+            // Langages (checkboxes multiples)
+            const langages = formData.getAll('langages');
+            if (langages.length > 0) data.langages = langages;
+
+            // Niveau (radio)
+            const niveau = formData.get('niveau');
+            if (niveau) data.niveau = niveau;
+
+            // Newsletter et conditions (checkboxes)
+            const newsletter = formData.get('newsletter');
+            const conditions = formData.get('conditions');
+            if (newsletter) data.newsletter = newsletter;
+            if (conditions) data.conditions = conditions;
+
+            // CV (fichier)
+            const cvFile = document.getElementById('cv').files[0];
+            if (cvFile) data.cv = cvFile.name;
+
+            // Générer l'HTML du résumé
+            const labels = {
+                nom: 'Nom',
+                prenom: 'Prénom',
+                email: 'Email',
+                telephone: 'Téléphone',
+                dateNaissance: 'Date de naissance',
+                age: 'Âge',
+                entreprise: 'Entreprise',
+                poste: 'Poste',
+                experience: 'Années d\'expérience',
+                langages: 'Langages de programmation',
+                niveau: 'Niveau en automatisation',
+                motivation: 'Motivation',
+                cv: 'CV',
+                newsletter: 'Newsletter',
+                conditions: 'Conditions générales'
+            };
+
+            Object.keys(data).forEach(key => {
+                let value = data[key];
+                
+                if (Array.isArray(value)) {
+                    value = value.join(', ');
+                } else if (key === 'newsletter' || key === 'conditions') {
+                    value = 'Oui';
+                }
+
+                summaryHTML += `
+                    <div class="summary-item">
+                        <div class="summary-label">${labels[key] || key}</div>
+                        <div class="summary-value">${value}</div>
+                    </div>
+                `;
+            });
+
+            modalBody.innerHTML = summaryHTML;
+        }
+
+        // Event listeners
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (validateForm()) {
+                generateSummary();
+                modal.style.display = 'block';
+            }
+        });
+
+        btnAnnuler.addEventListener('click', function() {
+            if (confirm('Êtes-vous sûr de vouloir annuler ? Toutes les données saisies seront perdues.')) {
+                resetForm();
+            }
+        });
+
+        // Validation en temps réel
+        form.addEventListener('input', function(e) {
+            if (e.target.matches('input, select, textarea')) {
+                validateField(e.target);
+            }
+        });
+
+        form.addEventListener('change', function(e) {
+            if (e.target.matches('input, select, textarea')) {
+                validateField(e.target);
+            }
+        });
+
+        // Gestion de la modal
+        closeModal.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Gestion de l'upload de fichier
+        document.getElementById('cv').addEventListener('change', function(e) {
+            const fileLabel = document.querySelector('.file-upload-label');
+            if (e.target.files.length > 0) {
+                fileLabel.textContent = `Fichier sélectionné: ${e.target.files[0].name}`;
+            } else {
+                fileLabel.textContent = 'Cliquez pour sélectionner un fichier ou glissez-déposez';
+            }
+        });
+    </script>
+</body>
+</html>
