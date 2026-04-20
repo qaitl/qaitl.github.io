@@ -37,22 +37,30 @@
     .title-slide { background: linear-gradient(135deg, var(--istqb-primary) 0%, #1976B9 60%, var(--istqb-accent) 120%); color: #fff !important; }
     .title-slide h1, .title-slide h2, .title-slide h3, .title-slide p { color: #fff !important; text-align: center; }
     .title-slide .eyebrow { opacity: .85; letter-spacing: .25em; text-transform: uppercase; font-size: .6em; margin-bottom: 1em; }
-    .title-slide h1 { font-size: 2.4em; line-height: 1.1; margin-bottom: 0.2em; }
-    .title-slide .subtitle { font-size: 1em; opacity: .95; margin-top: 1em; max-width: 80%; margin-left:auto; margin-right:auto; }
-    .title-slide .footer { position: absolute; bottom: 40px; left: 0; right: 0; font-size: .5em; opacity: .75; text-align:center; }
+    .title-slide h1 { font-size: 1.9em; line-height: 1.15; margin-bottom: 0.2em; }
+    .title-slide .subtitle { font-size: .8em; opacity: .95; margin-top: .8em; max-width: 95%; margin-left:auto; margin-right:auto; }
+    .title-slide .footer { font-size: .45em; opacity: .7; text-align:center; margin-top: 2.5em; }
 
     /* Section divider */
-    .divider { background: var(--istqb-dark); color: #fff !important; }
+    .divider { color: #fff !important; }
     .divider h1, .divider h2, .divider p, .divider .eyebrow { color: #fff !important; }
+    .divider h1 { font-size: 1.8em; line-height: 1.1; }
     .divider .eyebrow { opacity:.6; letter-spacing:.25em; text-transform:uppercase; font-size:.55em; }
-    .divider .chapnum { font-size: 6em; font-weight: 800; color: var(--istqb-accent); line-height: 1; }
+    .divider .chapnum { font-size: 5em; font-weight: 800; color: var(--istqb-accent); line-height: 1; margin: .1em 0; }
+    /* Cards inside a divider (synthesis slide) must keep readable text colors */
+    .divider .card, .divider .card p { color: var(--istqb-dark) !important; }
+    .divider .card h3 { color: var(--istqb-primary) !important; }
 
     /* Cards / grids */
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
     .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .8em; }
+    .grid-2.compact { gap: .5em; }
     .card { background: var(--istqb-soft); border-left: 4px solid var(--istqb-primary); padding: .8em 1em; border-radius: 6px; }
     .card h3 { margin: 0 0 .3em 0; color: var(--istqb-primary); font-size: 1em; }
     .card p, .card li { font-size: .75em; margin: .2em 0; }
+    .grid-2.compact .card { padding: .4em .7em; }
+    .grid-2.compact .card h3 { font-size: .8em; margin: 0 0 .1em 0; }
+    .grid-2.compact .card p { font-size: .6em; line-height: 1.3; }
     .card.accent { border-left-color: var(--istqb-accent); }
     .card.ok     { border-left-color: var(--istqb-ok); }
     .card.warn   { border-left-color: var(--istqb-warn); }
@@ -94,9 +102,9 @@
     .timeline .step.current { border-top-color: var(--istqb-accent); background: #FFF7ED; }
 
     /* Key takeaway */
-    .takeaway { background: linear-gradient(135deg, var(--istqb-primary), #1976B9); color: #fff; padding: 1em 1.2em; border-radius: 10px; margin-top: 1em; }
-    .takeaway h3 { color: #fff; margin: 0 0 .3em 0; font-size: .9em; }
-    .takeaway p { color: #fff; font-size: .8em; margin: 0; }
+    .takeaway { background: linear-gradient(135deg, var(--istqb-primary), #1976B9); color: #fff; padding: .6em 1em; border-radius: 10px; margin-top: .6em; }
+    .takeaway h3 { color: #fff; margin: 0 0 .2em 0; font-size: .85em; }
+    .takeaway p { color: #fff; font-size: .7em; margin: 0; line-height: 1.35; }
 
     /* Slide footer / page number */
     .slide-footer { position: absolute; bottom: 10px; left: 40px; right: 40px; font-size: 12px; color: var(--istqb-muted); display: flex; justify-content: space-between; align-items: center; }
@@ -118,9 +126,9 @@
         <p class="eyebrow">GAIAT · ISTQB CT-GenAI · Module 01</p>
         <h1>Fondements &amp; concepts clés<br/>de l'IA générative</h1>
         <p class="subtitle">Comprendre de quoi on parle avant de l'appliquer aux tests logiciels</p>
-        <p class="footer">QA IT Leaders — qaitl.github.io/gaiat</p>
+        <p class="footer">Denis Willems — qaitl.github.io/gaiat</p>
         <aside class="notes">
-          Bienvenue dans le premier module du parcours GAIAT. Objectif : poser un socle commun avant d'aborder le prompting et la gestion des risques. Durée : ~2h en présentiel, 1h30 en autoformation.
+          Bienvenue dans le premier module du parcours GenIA pour le test. Objectif : poser un socle commun avant d'aborder le prompting et la gestion des risques. Durée : ~2h en présentiel, 1h30 en autoformation.
         </aside>
       </section>
 
@@ -129,7 +137,7 @@
       ============================================================ -->
       <section>
         <h2>Plan du module</h2>
-        <div class="grid-2">
+        <div class="grid-2 compact">
           <div class="card"><h3>1 · Panorama de l'IA</h3><p>De l'IA symbolique à l'IA générative</p></div>
           <div class="card"><h3>2 · Comment fonctionne un LLM</h3><p>Prédire le mot suivant, rien de plus</p></div>
           <div class="card"><h3>3 · Les grands acteurs</h3><p>OpenAI, Google, Anthropic, Meta, Mistral…</p></div>
@@ -150,7 +158,7 @@
            SECTION 1 — Panorama de l'IA
       ============================================================ -->
       <section>
-        <section class="divider center">
+        <section class="divider center" data-background-color="#1B2B3A">
           <p class="eyebrow">Section 1</p>
           <div class="chapnum">01</div>
           <h1>Panorama de l'IA</h1>
@@ -195,7 +203,7 @@
            SECTION 2 — Comment fonctionne un LLM
       ============================================================ -->
       <section>
-        <section class="divider center">
+        <section class="divider center" data-background-color="#1B2B3A">
           <p class="eyebrow">Section 2</p>
           <div class="chapnum">02</div>
           <h1>Comment fonctionne un LLM ?</h1>
@@ -252,7 +260,7 @@
            SECTION 3 — Les grands acteurs
       ============================================================ -->
       <section>
-        <section class="divider center">
+        <section class="divider center" data-background-color="#1B2B3A">
           <p class="eyebrow">Section 3</p>
           <div class="chapnum">03</div>
           <h1>Les grands acteurs du marché</h1>
@@ -287,7 +295,7 @@
            SECTION 4 — Les 3 visages de la GenAI
       ============================================================ -->
       <section>
-        <section class="divider center">
+        <section class="divider center" data-background-color="#1B2B3A">
           <p class="eyebrow">Section 4</p>
           <div class="chapnum">04</div>
           <h1>Les 3 visages de la GenAI</h1>
@@ -344,7 +352,7 @@
            SECTION 5 — Usages textuels
       ============================================================ -->
       <section>
-        <section class="divider center">
+        <section class="divider center" data-background-color="#1B2B3A">
           <p class="eyebrow">Section 5</p>
           <div class="chapnum">05</div>
           <h1>Usages textuels</h1>
@@ -353,7 +361,7 @@
 
         <section>
           <h2>Cinq familles d'usage</h2>
-          <div class="grid-2">
+          <div class="grid-2 compact">
             <div class="card">
               <h3>Générer</h3>
               <p>Email pro, 1ʳᵉ version de cas de test (<em>test case</em>), données de test (<em>test data</em>) fictives.</p>
@@ -382,7 +390,7 @@
            SECTION 6 — Activités textuelles
       ============================================================ -->
       <section>
-        <section class="divider center">
+        <section class="divider center" data-background-color="#1B2B3A">
           <p class="eyebrow">Section 6</p>
           <div class="chapnum">06</div>
           <h1>Activités textuelles</h1>
@@ -458,7 +466,7 @@
 
         <section>
           <h3>Activité 5 — Les 6 épreuves</h3>
-          <div class="grid-2" style="font-size:.85em;">
+          <div class="grid-2 compact">
             <div class="card">
               <h3>1 · Comptage de lettres</h3>
               <p><em>« Compte les 't' dans : j'aime tester et trouver des bugs toute la journée »</em><br/><strong>Réponse : 7.</strong> Souvent 5 ou 6, défendus avec assurance.</p>
@@ -495,7 +503,7 @@
            SECTION 7 — Multimodal
       ============================================================ -->
       <section>
-        <section class="divider center">
+        <section class="divider center" data-background-color="#1B2B3A">
           <p class="eyebrow">Section 7</p>
           <div class="chapnum">07</div>
           <h1>Multimodal &amp; vision</h1>
@@ -550,7 +558,7 @@
            SECTION 8 — Activités multimodales
       ============================================================ -->
       <section>
-        <section class="divider center">
+        <section class="divider center" data-background-color="#1B2B3A">
           <p class="eyebrow">Section 8</p>
           <div class="chapnum">08</div>
           <h1>Activités multimodales</h1>
@@ -604,7 +612,7 @@
            SECTION 9 — Raisonnement & IA agentique
       ============================================================ -->
       <section>
-        <section class="divider center">
+        <section class="divider center" data-background-color="#1B2B3A">
           <p class="eyebrow">Section 9</p>
           <div class="chapnum">09</div>
           <h1>Raisonnement &amp; IA agentique</h1>
@@ -653,7 +661,7 @@
            SECTION 10 — Capacités LLM pour le test
       ============================================================ -->
       <section>
-        <section class="divider center">
+        <section class="divider center" data-background-color="#1B2B3A">
           <p class="eyebrow">Section 10</p>
           <div class="chapnum">10</div>
           <h1>Capacités LLM<br/>pour les tâches de test</h1>
