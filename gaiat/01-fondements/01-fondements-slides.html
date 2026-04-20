@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1024, user-scalable=yes">
+  <title>01 — Fondements de l'IA générative | GAIAT ISTQB</title>
+
+  <!-- Reveal.js core -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+
+  <style>
+    :root {
+      --istqb-primary: #0B5394;
+      --istqb-accent:  #E67E22;
+      --istqb-soft:    #EAF3FB;
+      --istqb-dark:    #1B2B3A;
+      --istqb-muted:   #6C7A89;
+      --istqb-ok:      #16A085;
+      --istqb-warn:    #C0392B;
+    }
+
+    .reveal { font-family: "Inter","Helvetica Neue",Helvetica,Arial,sans-serif; color: var(--istqb-dark); }
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 { font-family: "Inter","Helvetica Neue",sans-serif; color: var(--istqb-primary); text-transform: none; letter-spacing: -0.01em; font-weight: 700; }
+    .reveal h1 { font-size: 2.2em; }
+    .reveal h2 { font-size: 1.6em; }
+    .reveal h3 { font-size: 1.2em; color: var(--istqb-dark); }
+    .reveal section { text-align: left; }
+    .reveal section.center { text-align: center; }
+    .reveal p, .reveal li { line-height: 1.45; }
+    .reveal em { color: var(--istqb-accent); font-style: normal; font-weight: 600; }
+    .reveal strong { color: var(--istqb-primary); }
+    .reveal a { color: var(--istqb-accent); text-decoration: none; border-bottom: 1px dotted var(--istqb-accent); }
+
+    /* Title slide */
+    .title-slide { background: linear-gradient(135deg, var(--istqb-primary) 0%, #1976B9 60%, var(--istqb-accent) 120%); color: #fff !important; }
+    .title-slide h1, .title-slide h2, .title-slide h3, .title-slide p { color: #fff !important; text-align: center; }
+    .title-slide .eyebrow { opacity: .85; letter-spacing: .25em; text-transform: uppercase; font-size: .6em; margin-bottom: 1em; }
+    .title-slide h1 { font-size: 2.4em; line-height: 1.1; margin-bottom: 0.2em; }
+    .title-slide .subtitle { font-size: 1em; opacity: .95; margin-top: 1em; max-width: 80%; margin-left:auto; margin-right:auto; }
+    .title-slide .footer { position: absolute; bottom: 40px; left: 0; right: 0; font-size: .5em; opacity: .75; text-align:center; }
+
+    /* Section divider */
+    .divider { background: var(--istqb-dark); color: #fff !important; }
+    .divider h1, .divider h2, .divider p, .divider .eyebrow { color: #fff !important; }
+    .divider .eyebrow { opacity:.6; letter-spacing:.25em; text-transform:uppercase; font-size:.55em; }
+    .divider .chapnum { font-size: 6em; font-weight: 800; color: var(--istqb-accent); line-height: 1; }
+
+    /* Cards / grids */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .8em; }
+    .card { background: var(--istqb-soft); border-left: 4px solid var(--istqb-primary); padding: .8em 1em; border-radius: 6px; }
+    .card h3 { margin: 0 0 .3em 0; color: var(--istqb-primary); font-size: 1em; }
+    .card p, .card li { font-size: .75em; margin: .2em 0; }
+    .card.accent { border-left-color: var(--istqb-accent); }
+    .card.ok     { border-left-color: var(--istqb-ok); }
+    .card.warn   { border-left-color: var(--istqb-warn); }
+
+    /* Activity box */
+    .activity { background: #FFF7ED; border: 2px dashed var(--istqb-accent); border-radius: 10px; padding: .8em 1.1em; margin-top: .5em; }
+    .activity .label { display:inline-block; background: var(--istqb-accent); color:#fff; padding: 2px 10px; border-radius: 12px; font-size: .55em; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .4em; }
+    .activity h3 { margin-top: 0; color: var(--istqb-accent); font-size: 1em; }
+    .activity p, .activity li { font-size: .7em; }
+
+    /* Quote */
+    .reveal blockquote { border-left: 4px solid var(--istqb-accent); background: #FFF7ED; color: var(--istqb-dark); padding: .6em 1em; box-shadow: none; font-size: .85em; font-style: normal; border-radius: 0 6px 6px 0; }
+
+    /* Table */
+    .reveal table { font-size: .6em; width: 100%; border-collapse: collapse; }
+    .reveal table th { background: var(--istqb-primary); color: #fff; padding: 6px 10px; text-align: left; }
+    .reveal table td { padding: 5px 10px; border-bottom: 1px solid #E1E8ED; }
+    .reveal table tr:nth-child(even) td { background: #F6F9FC; }
+
+    /* Code */
+    .reveal pre { font-size: .65em; box-shadow: 0 2px 10px rgba(0,0,0,.12); }
+    .reveal code { font-family: "JetBrains Mono", Menlo, Consolas, monospace; }
+
+    /* Small helpers */
+    .eyebrow { font-size: .5em; letter-spacing: .2em; text-transform: uppercase; color: var(--istqb-muted); font-weight: 600; }
+    .muted { color: var(--istqb-muted); }
+    .center { text-align: center; }
+    .tag { display: inline-block; background: var(--istqb-primary); color: #fff; padding: 2px 10px; border-radius: 12px; font-size: .55em; letter-spacing: .08em; text-transform: uppercase; }
+    .tag.accent { background: var(--istqb-accent); }
+    .tag.ok { background: var(--istqb-ok); }
+    .tag.warn { background: var(--istqb-warn); }
+
+    /* Timeline */
+    .timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6em; margin-top: 1em; }
+    .timeline .step { background: #fff; border: 1px solid #D8E2EB; border-top: 4px solid var(--istqb-primary); padding: .6em .8em; border-radius: 6px; }
+    .timeline .step .year { font-size: .6em; color: var(--istqb-muted); letter-spacing: .05em; }
+    .timeline .step h4 { font-size: .85em; margin: .2em 0; color: var(--istqb-primary); }
+    .timeline .step p { font-size: .6em; margin: 0; }
+    .timeline .step.current { border-top-color: var(--istqb-accent); background: #FFF7ED; }
+
+    /* Key takeaway */
+    .takeaway { background: linear-gradient(135deg, var(--istqb-primary), #1976B9); color: #fff; padding: 1em 1.2em; border-radius: 10px; margin-top: 1em; }
+    .takeaway h3 { color: #fff; margin: 0 0 .3em 0; font-size: .9em; }
+    .takeaway p { color: #fff; font-size: .8em; margin: 0; }
+
+    /* Slide footer / page number */
+    .slide-footer { position: absolute; bottom: 10px; left: 40px; right: 40px; font-size: 12px; color: var(--istqb-muted); display: flex; justify-content: space-between; align-items: center; }
+
+    /* Print / handout tweaks */
+    @media print {
+      .slide-footer { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ============================================================
+           SLIDE 1 — Couverture
+      ============================================================ -->
+      <section class="title-slide center" data-background-color="#0B5394">
+        <p class="eyebrow">GAIAT · ISTQB CT-GenAI · Module 01</p>
+        <h1>Fondements &amp; concepts clés<br/>de l'IA générative</h1>
+        <p class="subtitle">Comprendre de quoi on parle avant de l'appliquer aux tests logiciels</p>
+        <p class="footer">QA IT Leaders — qaitl.github.io/gaiat</p>
+        <aside class="notes">
+          Bienvenue dans le premier module du parcours GAIAT. Objectif : poser un socle commun avant d'aborder le prompting et la gestion des risques. Durée : ~2h en présentiel, 1h30 en autoformation.
+        </aside>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 2 — Plan du module
+      ============================================================ -->
+      <section>
+        <h2>Plan du module</h2>
+        <div class="grid-2">
+          <div class="card"><h3>1 · Panorama de l'IA</h3><p>De l'IA symbolique à l'IA générative</p></div>
+          <div class="card"><h3>2 · Comment fonctionne un LLM</h3><p>Prédire le mot suivant, rien de plus</p></div>
+          <div class="card"><h3>3 · Les grands acteurs</h3><p>OpenAI, Google, Anthropic, Meta, Mistral…</p></div>
+          <div class="card"><h3>4 · Les 3 visages de la GenAI</h3><p>Chatbot · Open source · Outil intégré</p></div>
+          <div class="card"><h3>5 · Usages textuels</h3><p>Générer, résumer, traduire, Q&amp;A, débogage</p></div>
+          <div class="card accent"><h3>6 · Activités textuelles</h3><p>5 exercices pratiques</p></div>
+          <div class="card"><h3>7 · Multimodal &amp; vision</h3><p>Images, audio, vidéo</p></div>
+          <div class="card accent"><h3>8 · Activités multimodales</h3><p>3 exercices pratiques</p></div>
+          <div class="card"><h3>9 · Raisonnement &amp; IA agentique</h3><p>Les nouvelles frontières</p></div>
+          <div class="card"><h3>10 · Capacités LLM pour le test</h3><p>Ce que l'IA fait, ce qu'elle ne fait pas</p></div>
+        </div>
+        <aside class="notes">
+          Rappel : chaque section est précédée d'un quizz de positionnement (avant) et suivie d'un quizz de validation (après).
+        </aside>
+      </section>
+
+      <!-- ============================================================
+           SECTION 1 — Panorama de l'IA
+      ============================================================ -->
+      <section>
+        <section class="divider center">
+          <p class="eyebrow">Section 1</p>
+          <div class="chapnum">01</div>
+          <h1>Panorama de l'IA</h1>
+          <p class="muted" style="color:#AAB8C5">D'où vient-on ?</p>
+        </section>
+
+        <section>
+          <h2>Quatre grandes époques</h2>
+          <div class="timeline">
+            <div class="step">
+              <div class="year">1950 — 1980</div>
+              <h4>IA symbolique</h4>
+              <p>Règles écrites par des experts. <em>Si X alors Y</em>. Systèmes experts, arbres de décision.</p>
+            </div>
+            <div class="step">
+              <div class="year">1990 — 2010</div>
+              <h4>Machine Learning</h4>
+              <p>L'algorithme apprend les patterns à partir d'exemples. Filtres anti-spam.</p>
+            </div>
+            <div class="step">
+              <div class="year">2010 — 2020</div>
+              <h4>Deep Learning</h4>
+              <p>Réseaux de neurones profonds. Reconnaissance d'images, traduction automatique, Siri / Alexa.</p>
+            </div>
+            <div class="step current">
+              <div class="year">Depuis 2020</div>
+              <h4>IA générative</h4>
+              <p>L'IA ne classe plus, elle <em>crée</em>. Texte, images, code, musique. LLMs au cœur.</p>
+            </div>
+          </div>
+          <div class="takeaway">
+            <h3>À retenir</h3>
+            <p>L'IA générative (<em>generative AI</em>) n'est pas née avec ChatGPT : c'est la 4ᵉ grande vague, qui s'appuie sur toutes les précédentes.</p>
+          </div>
+          <aside class="notes">
+            Insister sur la continuité : chaque époque a résolu un problème que l'IA précédente ne savait pas traiter. La GenAI hérite du deep learning.
+          </aside>
+        </section>
+      </section>
+
+      <!-- ============================================================
+           SECTION 2 — Comment fonctionne un LLM
+      ============================================================ -->
+      <section>
+        <section class="divider center">
+          <p class="eyebrow">Section 2</p>
+          <div class="chapnum">02</div>
+          <h1>Comment fonctionne un LLM ?</h1>
+        </section>
+
+        <section>
+          <h2>Le principe en une phrase</h2>
+          <blockquote style="font-size: 1.1em;">
+            Un grand modèle de langage (<em>grand modèle de langage / large language model, LLM</em>) est un programme qui <strong>prédit le mot le plus probable qui vient ensuite</strong>.
+          </blockquote>
+          <div class="grid-2" style="margin-top:1em;">
+            <div class="card">
+              <h3>Jeu de complétion</h3>
+              <p><em>« Le chat est sur le… »</em> → votre cerveau anticipe <em>tapis</em> ou <em>canapé</em>. Le LLM fait la même chose, mais à une échelle qui donne l'illusion de comprendre.</p>
+            </div>
+            <div class="card accent">
+              <h3>Ce qui le rend puissant</h3>
+              <p><strong>Volume</strong> — milliards de phrases, dizaines de langues<br/>
+              <strong>Taille</strong> — milliards de paramètres<br/>
+              <strong>Instruction-following</strong> — affiné (<em>fine-tuning</em>) pour suivre des instructions</p>
+            </div>
+          </div>
+          <aside class="notes">
+            Analogie de l'autocomplétion poussée à son paroxysme. Le LLM n'a pas de modèle du monde, il a un modèle du langage.
+          </aside>
+        </section>
+
+        <section>
+          <h2>Ce qu'un LLM ne fait <em>pas</em></h2>
+          <div class="grid-3">
+            <div class="card warn">
+              <h3>Il ne comprend pas</h3>
+              <p>Pas de sens au sens humain. Il manipule des distributions de probabilités.</p>
+            </div>
+            <div class="card warn">
+              <h3>Il ne raisonne pas</h3>
+              <p>Il simule un raisonnement plausible, ce qui n'est pas la même chose.</p>
+            </div>
+            <div class="card warn">
+              <h3>Il n'a pas de mémoire</h3>
+              <p>Aucune persistance entre conversations, sauf configuration spécifique.</p>
+            </div>
+          </div>
+          <blockquote style="margin-top:1em;">
+            <strong>Conséquence pour le testeur :</strong> ne jamais faire confiance aveuglément à un LLM pour vérifier un fait, compter, ou raisonner précisément — il faut <em>valider</em>.
+          </blockquote>
+          <aside class="notes">
+            Cette slide prépare la section "angles morts du LLM" de l'activité 5.
+          </aside>
+        </section>
+      </section>
+
+      <!-- ============================================================
+           SECTION 3 — Les grands acteurs
+      ============================================================ -->
+      <section>
+        <section class="divider center">
+          <p class="eyebrow">Section 3</p>
+          <div class="chapnum">03</div>
+          <h1>Les grands acteurs du marché</h1>
+        </section>
+
+        <section>
+          <h2>Qui fait quoi ?</h2>
+          <table>
+            <thead>
+              <tr><th>Acteur</th><th>Produit phare</th><th>Modèle économique</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>OpenAI</strong></td><td>ChatGPT, GPT-4o</td><td>Abonnement grand public + API</td></tr>
+              <tr><td><strong>Google / DeepMind</strong></td><td>Gemini (ex-Bard)</td><td>Intégré à Google Workspace + API</td></tr>
+              <tr><td><strong>Anthropic</strong></td><td>Claude (claude.ai)</td><td>Abonnement grand public + API</td></tr>
+              <tr><td><strong>Meta</strong></td><td>Llama 3, Llama 4</td><td>Open source (téléchargeable)</td></tr>
+              <tr><td><strong>Mistral AI</strong> 🇫🇷</td><td>Mistral, Mixtral, Le Chat</td><td>Open source + cloud</td></tr>
+              <tr><td><strong>Microsoft</strong></td><td>Copilot (Windows, Office, GitHub)</td><td>Intégré à Microsoft 365</td></tr>
+              <tr><td><strong>xAI</strong></td><td>Grok</td><td>Intégré à X (Twitter)</td></tr>
+            </tbody>
+          </table>
+          <blockquote>
+            <strong>À noter :</strong> Anthropic a été fondé par d'anciens dirigeants d'OpenAI. Mistral AI est une startup française, l'une des rares hors États-Unis avec des modèles de niveau mondial.
+          </blockquote>
+          <aside class="notes">
+            Ne pas recommander un produit : citer les acteurs neutrement. Le paysage évolue très vite.
+          </aside>
+        </section>
+      </section>
+
+      <!-- ============================================================
+           SECTION 4 — Les 3 visages de la GenAI
+      ============================================================ -->
+      <section>
+        <section class="divider center">
+          <p class="eyebrow">Section 4</p>
+          <div class="chapnum">04</div>
+          <h1>Les 3 visages de la GenAI</h1>
+          <p class="muted" style="color:#AAB8C5">Chatbot · Open source · Outil intégré</p>
+        </section>
+
+        <section>
+          <h2>1 — Le chatbot grand public</h2>
+          <p class="tag">ChatGPT</p> <p class="tag">Gemini</p> <p class="tag">Claude.ai</p>
+          <div class="grid-2" style="margin-top:.8em;">
+            <div class="card ok">
+              <h3>Avantages</h3>
+              <p>Sans installation, souvent gratuit. Idéal pour apprendre, rédiger, poser des questions générales.</p>
+            </div>
+            <div class="card warn">
+              <h3>Limites</h3>
+              <p>Messages envoyés vers des serveurs distants. Aucune connaissance du contexte métier de l'entreprise.</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>2 — L'open source auto-hébergé</h2>
+          <p class="tag">Llama 3 + Ollama</p> <p class="tag">Mistral 7B local</p>
+          <div class="grid-2" style="margin-top:.8em;">
+            <div class="card ok">
+              <h3>Avantages</h3>
+              <p>Le modèle tourne sur <em>votre</em> machine / serveur. Les données ne quittent jamais votre environnement — idéal pour données sensibles (banque, santé, défense).</p>
+            </div>
+            <div class="card warn">
+              <h3>Limites</h3>
+              <p>Configuration technique nécessaire. Modèles souvent moins puissants à usage général — mais suffisants pour de nombreux cas.</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>3 — L'outil intégrant un LLM</h2>
+          <table>
+            <thead><tr><th>Outil</th><th>Ce que l'IA apporte</th></tr></thead>
+            <tbody>
+              <tr><td><strong>GitHub Copilot</strong></td><td>Génération de code et de tests unitaires (<em>test unitaire / unit test</em>) dans l'éditeur</td></tr>
+              <tr><td><strong>Xray AI</strong> (Jira)</td><td>Génération de cas de test (<em>cas de test / test case</em>) depuis une user story</td></tr>
+              <tr><td><strong>Atlassian Intelligence</strong></td><td>Résumé de tickets, rédaction de doc, assistance recherche</td></tr>
+              <tr><td><strong>Microsoft 365 Copilot</strong></td><td>Rédaction d'emails, résumé de réunions, génération de présentations</td></tr>
+              <tr><td><strong>Zephyr Scale AI</strong></td><td>Suggestion de cas de test basée sur les exigences</td></tr>
+            </tbody>
+          </table>
+          <blockquote><strong>Analogie :</strong> un chatbot, c'est un consultant généraliste que vous appelez. Un outil intégré, c'est ce consultant assis à côté de vous, avec accès à vos fichiers.</blockquote>
+        </section>
+      </section>
+
+      <!-- ============================================================
+           SECTION 5 — Usages textuels
+      ============================================================ -->
+      <section>
+        <section class="divider center">
+          <p class="eyebrow">Section 5</p>
+          <div class="chapnum">05</div>
+          <h1>Usages textuels</h1>
+          <p class="muted" style="color:#AAB8C5">Ce que vous pouvez faire aujourd'hui, sans coder</p>
+        </section>
+
+        <section>
+          <h2>Cinq familles d'usage</h2>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Générer</h3>
+              <p>Email pro, 1ʳᵉ version de cas de test (<em>test case</em>), données de test (<em>test data</em>) fictives.</p>
+            </div>
+            <div class="card">
+              <h3>Résumer &amp; reformuler</h3>
+              <p>Specs longues en 10 points, rapport de défaut (<em>defect report</em>) simplifié, jargon juridique clarifié.</p>
+            </div>
+            <div class="card">
+              <h3>Traduire</h3>
+              <p>Doc technique multilingue, adaptation expert → débutant.</p>
+            </div>
+            <div class="card">
+              <h3>Q &amp; A</h3>
+              <p>Expliquer un concept (<em>test exploratoire / exploratory testing</em>), répondre sur un document fourni.</p>
+            </div>
+            <div class="card" style="grid-column: span 2;">
+              <h3>Débogage &amp; analyse</h3>
+              <p>Expliquer un message d'erreur, suggérer des causes possibles, comparer deux versions d'une exigence.</p>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ============================================================
+           SECTION 6 — Activités textuelles
+      ============================================================ -->
+      <section>
+        <section class="divider center">
+          <p class="eyebrow">Section 6</p>
+          <div class="chapnum">06</div>
+          <h1>Activités textuelles</h1>
+          <p class="muted" style="color:#AAB8C5">5 exercices pratiques · chatbot gratuit suffisant</p>
+        </section>
+
+        <section>
+          <div class="activity">
+            <div class="label">Activité 1</div>
+            <h3>Devinette de réponse</h3>
+            <p><strong>Objectif :</strong> comprendre que le LLM prédit ce qui est <em>probable</em>, pas ce qui est <em>vrai</em>.</p>
+            <ol>
+              <li>Choisissez une question ambiguë : <em>« Quelle est la meilleure façon de tester un formulaire d'inscription ? »</em></li>
+              <li>Chaque participant note en silence 3 idées de réponse.</li>
+              <li>Envoyez la question, lisez la réponse, comparez.</li>
+            </ol>
+            <p class="muted"><em>Ce qu'on apprend :</em> le LLM donne une réponse générique, pas adaptée à votre contexte précis.</p>
+          </div>
+        </section>
+
+        <section>
+          <div class="activity">
+            <div class="label">Activité 2</div>
+            <h3>Reformule-moi ça</h3>
+            <p><strong>Objectif :</strong> explorer la capacité de reformulation selon le public cible.</p>
+            <ol>
+              <li>Prenez un paragraphe technique.</li>
+              <li>Demandez successivement : <em>à un enfant de 10 ans</em>, <em>à un expert sécurité</em>, <em>en liste à puces</em>.</li>
+              <li>Comparez les 3 versions.</li>
+            </ol>
+            <p class="muted"><em>Ce qu'on apprend :</em> le LLM adapte son registre. Quelle version est « correcte » ?</p>
+          </div>
+        </section>
+
+        <section>
+          <div class="activity">
+            <div class="label">Activité 3</div>
+            <h3>Compare les chatbots</h3>
+            <p><strong>Objectif :</strong> comprendre que les modèles ne sont pas identiques.</p>
+            <ol>
+              <li>Posez la même question à ChatGPT et à Gemini (ou Claude).</li>
+              <li>Ex. : <em>« Donne-moi 5 cas de test pour la réinitialisation de mot de passe »</em>.</li>
+              <li>Comparez : identiques ? L'un est-il plus complet, plus prudent ?</li>
+            </ol>
+            <p class="muted"><em>Ce qu'on apprend :</em> il n'y a pas un seul « oracle » IA.</p>
+          </div>
+        </section>
+
+        <section>
+          <div class="activity">
+            <div class="label">Activité 4</div>
+            <h3>Le rapport de défaut amélioré</h3>
+            <p><strong>Objectif :</strong> expérimenter l'aide à la rédaction en contexte pro réel.</p>
+            <ol>
+              <li>Rédigez un rapport incomplet : <em>« L'appli plante quand on se connecte parfois »</em>.</li>
+              <li>Consigne : <em>« Améliore ce rapport : titre, étapes, résultat attendu/obtenu, sévérité »</em>.</li>
+              <li>Débat : est-ce utilisable ? Que manque-t-il encore ?</li>
+            </ol>
+            <p class="muted"><em>Ce qu'on apprend :</em> le LLM structure et complète, mais invente parfois. Validation humaine indispensable.</p>
+          </div>
+        </section>
+
+        <section>
+          <h3>Activité 5 — Les angles morts du LLM</h3>
+          <p><strong>Objectif :</strong> découvrir les tâches triviales qui mettent un LLM en échec.</p>
+          <blockquote>
+            <strong>Pourquoi ces échecs ?</strong> Un LLM découpe le texte en <em>tokens</em> (fragments de mots). « tester » peut devenir <code>test</code> + <code>er</code>. Pas de vision caractère par caractère → échec sur les tâches qui l'exigent.
+          </blockquote>
+          <aside class="notes">
+            6 épreuves suivent. Chronométrer ~15 min en atelier.
+          </aside>
+        </section>
+
+        <section>
+          <h3>Activité 5 — Les 6 épreuves</h3>
+          <div class="grid-2" style="font-size:.85em;">
+            <div class="card">
+              <h3>1 · Comptage de lettres</h3>
+              <p><em>« Compte les 't' dans : j'aime tester et trouver des bugs toute la journée »</em><br/><strong>Réponse : 7.</strong> Souvent 5 ou 6, défendus avec assurance.</p>
+            </div>
+            <div class="card">
+              <h3>2 · Inversion de mot</h3>
+              <p><em>« Inverse les lettres de développement »</em> → <code>tnemelppoleved</code>. Peu de modèles y arrivent du 1ᵉʳ coup.</p>
+            </div>
+            <div class="card">
+              <h3>3 · Comptage de mots répétés</h3>
+              <p>Compter « de » dans une phrase riche en <code>d'</code>. <strong>5 fois.</strong> Souvent oubliés.</p>
+            </div>
+            <div class="card">
+              <h3>4 · Classement par longueur</h3>
+              <p><em>bug · test · régression · acceptance</em> → 3, 4, 10, 10. Inversions fréquentes.</p>
+            </div>
+            <div class="card">
+              <h3>5 · Calendrier simple</h3>
+              <p>1ᵉʳ mars 2024 vendredi → 1ᵉʳ mars 2025 ? <strong>Samedi.</strong> 366 jours = 52 sem + 2 j.</p>
+            </div>
+            <div class="card">
+              <h3>6 · Logique de texte littéral</h3>
+              <p>« test » apparaît-il dans <em>« les exigences fonctionnelles servent de base à la vérification »</em> ? <strong>Non.</strong></p>
+            </div>
+          </div>
+          <div class="takeaway">
+            <h3>Ce qu'on apprend</h3>
+            <p>Excellent pour le sémantique. Peu fiable pour le comptage, les caractères, le calcul exact. <strong>Savoir identifier les angles morts = compétence clé du testeur IA.</strong></p>
+          </div>
+        </section>
+      </section>
+
+      <!-- ============================================================
+           SECTION 7 — Multimodal
+      ============================================================ -->
+      <section>
+        <section class="divider center">
+          <p class="eyebrow">Section 7</p>
+          <div class="chapnum">07</div>
+          <h1>Multimodal &amp; vision</h1>
+          <p class="muted" style="color:#AAB8C5">Au-delà du texte</p>
+        </section>
+
+        <section>
+          <h2>Qu'est-ce qu'un LLM multimodal ?</h2>
+          <p>Un modèle <em>multimodal</em> (<em>multimodal model</em>) traite et génère plusieurs types de données : texte, image, audio, vidéo, documents.</p>
+          <table>
+            <thead><tr><th>Modalité</th><th>Ce que le modèle peut faire</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Image — entrée</strong></td><td>Décrire, répondre à des questions, identifier des anomalies visuelles</td></tr>
+              <tr><td><strong>Image — sortie</strong></td><td>Générer (DALL·E, Midjourney, Stable Diffusion)</td></tr>
+              <tr><td><strong>Audio — entrée</strong></td><td>Transcrire et comprendre la parole (Whisper)</td></tr>
+              <tr><td><strong>Audio — sortie</strong></td><td>Synthèse vocale, conversations (ChatGPT Voice)</td></tr>
+              <tr><td><strong>Vidéo</strong></td><td>Décrire, identifier des événements dans une séquence</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2>Les grands modèles multimodaux</h2>
+          <div class="grid-2">
+            <div class="card"><h3>GPT-4o</h3><p class="muted">OpenAI</p><p>Texte, images, audio en entrée et sortie.</p></div>
+            <div class="card"><h3>Gemini 1.5 Pro / 2.0 Flash</h3><p class="muted">Google</p><p>Texte, images, audio, vidéo, code. Large fenêtre de contexte.</p></div>
+            <div class="card"><h3>Claude 3.5 / 3.7 Sonnet</h3><p class="muted">Anthropic</p><p>Texte et images en entrée, texte en sortie.</p></div>
+            <div class="card"><h3>Llama 3.2 Vision</h3><p class="muted">Meta</p><p>Modèle open source multimodal.</p></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Modèles de vision et tests logiciels</h2>
+          <div class="grid-3">
+            <div class="card">
+              <h3>Analyse d'UI</h3>
+              <p>Capture d'écran → lister les éléments d'interface (<em>interface element</em>). Comparer maquette et implémentation. Problèmes d'accessibilité (contraste, taille).</p>
+            </div>
+            <div class="card">
+              <h3>Automatisation visuelle</h3>
+              <p>Générer des localisateurs (<em>locator</em>) à partir d'une capture. Analyser les différences de rendu entre navigateurs.</p>
+            </div>
+            <div class="card">
+              <h3>Documentation visuelle</h3>
+              <p>Photo de tableau blanc → transcription automatique en Gherkin ou tableau structuré.</p>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ============================================================
+           SECTION 8 — Activités multimodales
+      ============================================================ -->
+      <section>
+        <section class="divider center">
+          <p class="eyebrow">Section 8</p>
+          <div class="chapnum">08</div>
+          <h1>Activités multimodales</h1>
+          <p class="muted" style="color:#AAB8C5">3 exercices pratiques · GPT-4o ou Gemini suffisent</p>
+        </section>
+
+        <section>
+          <div class="activity">
+            <div class="label">Activité 6</div>
+            <h3>Décris cette interface</h3>
+            <p><strong>Objectif :</strong> comprendre ce que le modèle « voit » dans une image.</p>
+            <ol>
+              <li>Prenez une capture d'écran d'une application que vous connaissez.</li>
+              <li>Consigne : <em>« Liste tous les éléments d'interface : boutons, champs, menus, messages, icônes. »</em></li>
+              <li>Comparez avec votre propre inventaire manuel.</li>
+            </ol>
+            <p class="muted"><em>Ce qu'on apprend :</em> précis mais manque parfois des détails subtils. Point de départ, pas résultat final.</p>
+          </div>
+        </section>
+
+        <section>
+          <div class="activity">
+            <div class="label">Activité 7</div>
+            <h3>Trouve la différence</h3>
+            <p><strong>Objectif :</strong> simuler un test de non-régression visuelle (<em>visual regression test</em>).</p>
+            <ol>
+              <li>Deux captures « avant / après » de la même page.</li>
+              <li>Consigne : <em>« Compare ces deux captures et liste les différences. »</em></li>
+              <li>Validez : tout détecté ? Fausses différences ?</li>
+            </ol>
+            <p class="muted"><em>Ce qu'on apprend :</em> détecte le sémantique (texte, bouton), pas le pixel-diffing rigoureux.</p>
+          </div>
+        </section>
+
+        <section>
+          <div class="activity">
+            <div class="label">Activité 8</div>
+            <h3>Photo de tableau blanc</h3>
+            <p><strong>Objectif :</strong> expérimenter la transcription de contenu non-numérique.</p>
+            <ol>
+              <li>Écrivez 3 à 5 scénarios de test (<em>test scenario</em>) à la main.</li>
+              <li>Photographiez, puis : <em>« Retranscris en tableau Markdown : ID, Description, Résultat attendu. »</em></li>
+              <li>Relisez : erreurs sur l'écriture peu lisible ?</li>
+            </ol>
+            <p class="muted"><em>Ce qu'on apprend :</em> gain de temps pour la saisie. Relecture obligatoire.</p>
+          </div>
+        </section>
+      </section>
+
+      <!-- ============================================================
+           SECTION 9 — Raisonnement & IA agentique
+      ============================================================ -->
+      <section>
+        <section class="divider center">
+          <p class="eyebrow">Section 9</p>
+          <div class="chapnum">09</div>
+          <h1>Raisonnement &amp; IA agentique</h1>
+          <p class="muted" style="color:#AAB8C5">Les nouvelles frontières</p>
+        </section>
+
+        <section>
+          <h2>Les modèles de raisonnement</h2>
+          <p>Depuis fin 2024, une nouvelle génération : les <em>modèles de raisonnement</em> (<em>reasoning model</em>). Avant de répondre, phase de réflexion interne (« chaîne de pensée » visible).</p>
+          <div class="grid-3">
+            <div class="card"><h3>o1, o3</h3><p class="muted">OpenAI</p><p>Efficaces sur maths, logique, code.</p></div>
+            <div class="card"><h3>Claude Sonnet<br/>extended thinking</h3><p class="muted">Anthropic</p><p>Raisonnement étendu activable.</p></div>
+            <div class="card"><h3>Gemini 2.0<br/>Flash Thinking</h3><p class="muted">Google</p><p>Raisonnement intégré.</p></div>
+          </div>
+          <blockquote>Moins d'erreurs sur les tâches complexes… mais plus lents et plus coûteux.</blockquote>
+        </section>
+
+        <section>
+          <h2>L'IA agentique</h2>
+          <p>Un <em>agent IA</em> (<em>AI agent</em>) ne se contente pas de répondre : il <strong>agit</strong>. Il enchaîne plusieurs étapes, utilise des outils externes, adapte son plan.</p>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Outils qu'un agent peut utiliser</h3>
+              <ul>
+                <li>Naviguer sur le web</li>
+                <li>Exécuter du code en sandbox</li>
+                <li>Lire / écrire des fichiers</li>
+                <li>Appeler des APIs (Jira, Slack, GitHub)</li>
+                <li>Piloter un navigateur (Playwright, Selenium)</li>
+              </ul>
+            </div>
+            <div class="card accent">
+              <h3>Dans le test logiciel</h3>
+              <p>Lire une user story → générer des cas de test (<em>test case</em>) → les pousser dans Jira → exécuter un script Playwright → rapporter. <strong>Sans intervention humaine.</strong></p>
+              <p class="muted">Exemples : Devin (Cognition), GitHub Copilot Workspace, Cursor.</p>
+            </div>
+          </div>
+          <div class="takeaway">
+            <h3>Changement de paradigme</h3>
+            <p>On ne demande plus une réponse, on confie une <em>mission</em>. Les capacités ET les risques s'amplifient (actions irréversibles, hallucinations en cascade). <strong>La supervision humaine reste essentielle.</strong></p>
+          </div>
+        </section>
+      </section>
+
+      <!-- ============================================================
+           SECTION 10 — Capacités LLM pour le test
+      ============================================================ -->
+      <section>
+        <section class="divider center">
+          <p class="eyebrow">Section 10</p>
+          <div class="chapnum">10</div>
+          <h1>Capacités LLM<br/>pour les tâches de test</h1>
+        </section>
+
+        <section>
+          <h2>Sept capacités clés</h2>
+          <table>
+            <thead><tr><th>Capacité</th><th>Application au test</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Génération de texte</strong></td><td>Cas de test (<em>test case</em>), critères d'acceptation (<em>acceptance criterion</em>), plans de test (<em>test plan</em>)</td></tr>
+              <tr><td><strong>Résumé &amp; extraction</strong></td><td>Résumer des specs, extraire les règles métier</td></tr>
+              <tr><td><strong>Classification</strong></td><td>Trier les défauts (<em>defect</em>) par type/priorité ; classer exigences par risque</td></tr>
+              <tr><td><strong>Transformation de format</strong></td><td>User story → Gherkin ; Excel → cas de test Markdown</td></tr>
+              <tr><td><strong>Q&amp;A contextuel</strong></td><td>Interroger une spec pour vérifier la couverture des exigences (<em>requirements coverage</em>)</td></tr>
+              <tr><td><strong>Complétion &amp; suggestion</strong></td><td>Suggérer des cas limites (<em>boundary value</em>) manquants</td></tr>
+              <tr><td><strong>Détection d'anomalies</strong></td><td>Repérer des exigences contradictoires ou incomplètes</td></tr>
+            </tbody>
+          </table>
+          <blockquote><strong>Limite clé :</strong> ces capacités sont <em>probabilistes</em>, pas déterministes. La vérification humaine est obligatoire.</blockquote>
+        </section>
+
+        <section>
+          <h2>Deux façons d'intégrer un LLM</h2>
+          <div class="grid-2">
+            <div class="card">
+              <h3>1 · Chatbot direct</h3>
+              <p><em>« Génère 10 cas de test pour "ajout au panier" »</em><br/><em>« Identifie les ambiguïtés de cette user story »</em><br/><em>« Explique ce message d'erreur »</em></p>
+              <p class="muted">Rapide, sans config. Ponctuel.</p>
+            </div>
+            <div class="card accent">
+              <h3>2 · Application LLM</h3>
+              <p>Outils spécialisés, contexte métier injecté automatiquement : GitHub Copilot, Xray AI, Atlassian Intelligence, Testim, Mabl, M365 Copilot.</p>
+              <p class="muted">Contextuel, intégré, industrialisable.</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Ce que l'IA ne remplace pas (encore)</h2>
+          <table>
+            <thead><tr><th>Ce que l'IA fait bien</th><th>Ce pour quoi l'humain reste indispensable</th></tr></thead>
+            <tbody>
+              <tr><td>Générer une 1ʳᵉ version de cas de test</td><td>Valider la pertinence métier</td></tr>
+              <tr><td>Reformuler une exigence ambiguë</td><td>Décider de l'interprétation avec les parties prenantes</td></tr>
+              <tr><td>Suggérer des données de test</td><td>Vérifier conformité légale et confidentialité</td></tr>
+              <tr><td>Identifier des cas limites courants</td><td>Détecter les risques spécifiques au métier</td></tr>
+              <tr><td>Accélérer la doc</td><td>Garantir l'exactitude technique</td></tr>
+            </tbody>
+          </table>
+          <div class="takeaway">
+            <h3>À retenir</h3>
+            <p>L'IA générative est un <em>accélérateur</em>, pas un remplaçant. Elle déplace l'effort humain vers <strong>la validation, le jugement et la créativité</strong> — là où la valeur du testeur est la plus forte.</p>
+          </div>
+        </section>
+
+        <section>
+          <div class="activity">
+            <div class="label">Activité 9</div>
+            <h3>Du brouillon au cas de test</h3>
+            <p><strong>Objectif :</strong> chaîne complète exigence → génération → validation.</p>
+            <ol>
+              <li>User story courte : <em>réinitialisation de mot de passe.</em></li>
+              <li>Consigne : <em>« Génère une suite : ID, titre, préconditions, étapes, résultat, type (nominal / alternatif / négatif). »</em></li>
+              <li>Analyse : cas pertinents ? cas absents (lien expiré, email inexistant) ? Comportements inventés ?</li>
+            </ol>
+            <p class="muted"><em>Ce qu'on apprend :</em> base solide rapide ; cas négatifs (<em>negative test case</em>) et limites métier = valeur du testeur.</p>
+          </div>
+        </section>
+
+        <section>
+          <div class="activity">
+            <div class="label">Activité 10</div>
+            <h3>L'exigence ambiguë</h3>
+            <p><strong>Objectif :</strong> utiliser le LLM comme outil d'analyse des exigences (<em>requirements analysis</em>).</p>
+            <ol>
+              <li>Exigence floue : <em>« Le système doit répondre rapidement aux requêtes. »</em></li>
+              <li>Consigne : <em>« Identifie les ambiguïtés et reformule de manière testable avec des critères mesurables. »</em></li>
+              <li>Comparez à votre interprétation.</li>
+            </ol>
+            <p class="muted"><em>Ce qu'on apprend :</em> excellent pour signaler les termes vagues. Le <strong>seuil acceptable</strong> reste une décision humaine et métier.</p>
+          </div>
+        </section>
+      </section>
+
+      <!-- ============================================================
+           SYNTHÈSE FINALE
+      ============================================================ -->
+      <section class="divider center" data-background-color="#0B5394">
+        <p class="eyebrow">Synthèse</p>
+        <h1>3 idées à emporter</h1>
+        <div class="grid-3" style="margin-top:1.5em; text-align:left;">
+          <div class="card" style="background:#fff;">
+            <h3>1 · Un LLM prédit, il ne comprend pas</h3>
+            <p>Probabiliste, pas déterministe. Angles morts sur le comptage, les caractères, le calcul.</p>
+          </div>
+          <div class="card accent" style="background:#fff;">
+            <h3>2 · Trois façons de l'utiliser</h3>
+            <p>Chatbot · open source local · outil intégré. Chacune avec ses forces et ses risques.</p>
+          </div>
+          <div class="card ok" style="background:#fff;">
+            <h3>3 · Accélérateur, pas remplaçant</h3>
+            <p>Le testeur se concentre sur validation, jugement et créativité.</p>
+          </div>
+        </div>
+        <p class="footer" style="position:absolute; bottom:30px; left:0; right:0; color:#fff; opacity:.7; font-size:.5em; text-align:center;">Module suivant · Ingénierie du prompting pour des tests logiciels efficaces</p>
+      </section>
+
+      <section class="title-slide center">
+        <p class="eyebrow">Quizz</p>
+        <h2>Valider les acquis</h2>
+        <p class="subtitle">Quizz avant (10 questions) &amp; quizz après (18 questions) disponibles dans le dossier <code>01-fondements</code>.</p>
+        <p style="margin-top:2em; font-size:.7em; opacity:.85;">
+          <a href="01-introduction-ia-generative-quizz-avant.md" style="color:#fff; border-color:#fff;">Quizz avant →</a> &nbsp;·&nbsp;
+          <a href="01-introduction-ia-generative-quizz-apres.md" style="color:#fff; border-color:#fff;">Quizz après →</a>
+        </p>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Reveal.js scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/search/search.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      controls: true,
+      progress: true,
+      transition: 'slide',
+      transitionSpeed: 'default',
+      width: 1280,
+      height: 800,
+      margin: 0.06,
+      minScale: 0.2,
+      maxScale: 2.0,
+      plugins: [ RevealNotes, RevealHighlight, RevealSearch ]
+    });
+  </script>
+</body>
+</html>
