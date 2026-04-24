@@ -41,6 +41,7 @@ Ce que le LLM ne fait pas (au sens strict) : il ne "comprend" pas, ne "raisonne"
 
 Le marché de l'IA générative est dominé par quelques grandes organisations, aux positionnements différents.
 
+
 | Acteur | Produit phare | Modèle économique |
 |---|---|---|
 | **OpenAI** | ChatGPT, GPT-4o | Abonnement grand public + API payante |
@@ -84,11 +85,13 @@ Ici, le modèle tourne **sur votre machine** (ou un serveur interne à votre org
 ### 4.3 L'outil intégrant un LLM (LLM-powered tool)
 **Exemples dans le domaine du test et de la gestion de projet :**
 
+**à revoir**
+
 | Outil | Ce que l'IA apporte |
 |---|---|
 | **GitHub Copilot** | Génération de code et de tests unitaires directement dans l'éditeur |
-| **Xray AI** (plugin Jira) | Génération automatique de cas de test (cas de test / test case) à partir d'une user story |
-| **Atlassian Intelligence** (Jira, Confluence) | Résumé de tickets, rédaction de documentation, assistant dans la recherche |
+| **Xray AI** (plugin Jira) | Génération automatique de cas de test (cas de test / test case) à partir d'une user story - à vérifier|
+| **Atlassian Intelligence (Rovo)** (Jira, Confluence) | Résumé de tickets, rédaction de documentation, assistant dans la recherche |
 | **Microsoft 365 Copilot** (Word, Outlook, Teams) | Rédaction d'emails, résumé de réunions, génération de présentations |
 | **Zephyr Scale AI** | Suggestion de cas de test basée sur les exigences |
 
