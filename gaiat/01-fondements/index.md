@@ -13,5 +13,6 @@ Ce dossier couvre le premier bloc du référentiel ISTQB CT-GenAI. Il s'adresse 
 | [01-fondements-slides.html](01-fondements-slides.html) | Slides de présentation |
 | [01-introduction-ia-generative.md](01-introduction-ia-generative.md) | Introduction complète : panorama de l'IA, grands acteurs, types d'outils, usages textuels, multimodalité, IA agentique — avec activités pratiques |
 | [01-introduction-ia-generative-pour-en-savoir-plus.md](01-introduction-ia-generative-pour-en-savoir-plus.md) | Pour en savoir plus : Transformer, tokenisation et embeddings, fenêtre contextuelle et hyperparamètres, catégories de LLM, multimodalité, RAG et agents, lexique et références |
+| [comment-fonctionne-un-llm.html](comment-fonctionne-un-llm.html) | Visualisation interactive : comment fonctionne un LLM |
 | [01-introduction-ia-generative-quizz-avant.md](01-introduction-ia-generative-quizz-avant.md) | Quizz de positionnement (10 questions) — à passer AVANT l'atelier pour décider si le module est nécessaire |
 | [01-introduction-ia-generative-quizz-apres.md](01-introduction-ia-generative-quizz-apres.md) | Quizz de validation des acquis (18 questions) — à passer APRÈS l'atelier |
