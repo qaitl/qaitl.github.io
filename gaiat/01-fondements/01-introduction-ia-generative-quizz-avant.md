@@ -4,9 +4,9 @@
 > **Objectif :** Ce quizz permet de déterminer si vous avez besoin de suivre ce module ou si vous maîtrisez déjà les fondements de l'IA générative.
 >
 > **Interprétation du score :**
-> - **0–4 points** : Ce module est fait pour vous — les bases sont à construire.
-> - **5–7 points** : Quelques notions sont acquises, mais un parcours rapide du module est recommandé.
-> - **8–10 points** : Vous maîtrisez déjà les fondements. Vous pouvez passer directement au module suivant.
+> - **0–4 points** : Cette formation est faite pour vous — les bases sont à construire.
+> - **5–7 points** : Quelques notions sont acquises, mais un parcours rapide du module est recommandé => suivre la formation pourrait quand-même vous être utile.
+> - **8–10 points** : Cette formation n'est pas peut-être pas nécessaire, mais vous êtes le bienvenu.
 
 ---
 
@@ -83,18 +83,20 @@ Un chatbot grand public est généraliste et sans contexte. Un outil intégrant 
 ---
 
 ### Question 5
-**Parmi ces tâches, laquelle est un point faible connu des LLMs ?**
+**Parmi ces tâches, laquelle est un point faible connu des LLMs  ?**
 
 - A. Reformuler un texte dans un style différent
 - B. Résumer un long document
-- C. Compter exactement le nombre d'occurrences d'une lettre dans une phrase
+- C. Citer des références précises (URLs, articles, jurisprudence) sans en inventer
 - D. Générer des cas de test à partir d'une user story
 
 <details><summary>Réponse</summary>
 
-**C. Compter exactement le nombre d'occurrences d'une lettre**
+**C. Citer des références précises sans en inventer**
 
-Les LLMs découpent le texte en tokens, pas en caractères individuels. Les tâches nécessitant une manipulation caractère par caractère ou un comptage exact sont peu fiables.
+Les LLMs sont sujets aux *hallucinations* : ils peuvent générer des URLs, titres d'articles, DOI ou citations qui paraissent plausibles mais qui n'existent pas. Sans outil de recherche ou de vérification connecté, leur fiabilité sur les sources précises reste limitée.
+
+*Note : le comptage de lettres ("combien de R dans strawberry"), longtemps cité comme exemple, n'est plus un point faible représentatif — les modèles récents s'en sortent désormais correctement, soit par entraînement, soit en s'appuyant sur du raisonnement étape par étape ou des outils.*
 
 </details>
 

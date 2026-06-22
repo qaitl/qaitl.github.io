@@ -1,0 +1,1483 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comment fonctionne un LLM — Visualisation interactive</title>
+<meta name="description" content="Plongée visuelle et interactive dans l'architecture Transformer : tokenisation, encodage positionnel, self-attention Q-K-V, génération autoregressive.">
+<meta property="og:title" content="Comment fonctionne un LLM">
+<meta property="og:description" content="Visualisation interactive de l'architecture Transformer en français.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F7F5;
+    --bg-card:#FFFFFF;
+    --bg-deep:#0D0D0D;
+    --ink:#111111;
+    --ink-2:#2A2A2A;
+    --muted:#6B6B6B;
+    --line:#E2E2E0;
+    --line-soft:#EFEFED;
+    --accent:#E85D1C;
+    --accent-deep:#B8470F;
+    --navy:#2A2A2A;
+    --gold:#6B6B6B;
+    --teal:#4A4A4A;
+    --plum:#6B6B6B;
+    --serif:'Newsreader',Georgia,serif;
+    --display:'Instrument Serif',Georgia,serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:18px;
+    line-height:1.65;
+    font-weight:400;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--accent);color:#fff}
+
+  /* paper grain */
+  body::before{
+    content:'';
+    position:fixed;inset:0;
+    pointer-events:none;
+    opacity:0.4;
+    z-index:1;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' seed='5'/><feColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.025 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode:multiply;
+  }
+
+  /* nav rail */
+  nav.rail{
+    position:fixed;
+    left:32px;
+    top:50%;
+    transform:translateY(-50%);
+    z-index:50;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:0.08em;
+  }
+  nav.rail a{
+    color:var(--muted);
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    transition:color .25s;
+  }
+  nav.rail a .dot{
+    width:8px;height:8px;border-radius:50%;
+    border:1px solid var(--muted);
+    transition:all .25s;
+  }
+  nav.rail a:hover{color:var(--ink)}
+  nav.rail a:hover .dot{background:var(--accent);border-color:var(--accent)}
+  nav.rail a.active{color:var(--ink)}
+  nav.rail a.active .dot{background:var(--accent);border-color:var(--accent);transform:scale(1.4)}
+  nav.rail a span.label{opacity:0;transition:opacity .25s;}
+  nav.rail a:hover span.label, nav.rail a.active span.label{opacity:1}
+  @media (max-width:900px){nav.rail{display:none}}
+
+  /* layout */
+  main{position:relative;z-index:2}
+  section{
+    max-width:920px;
+    margin:0 auto;
+    padding:120px 32px;
+    position:relative;
+  }
+  @media (max-width:640px){section{padding:80px 22px}}
+
+  /* hero */
+  .hero{
+    min-height:92vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding-top:80px;
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:32px;
+    display:inline-flex;
+    align-items:center;
+    gap:14px;
+  }
+  .eyebrow::before{
+    content:'';display:inline-block;width:42px;height:1px;background:var(--accent);
+  }
+  h1.title{
+    font-family:var(--display);
+    font-size:clamp(56px,9vw,128px);
+    font-weight:400;
+    line-height:0.92;
+    letter-spacing:-0.02em;
+    margin-bottom:38px;
+  }
+  h1.title em{
+    font-style:italic;
+    color:var(--accent);
+  }
+  .lede{
+    font-family:var(--serif);
+    font-size:22px;
+    line-height:1.55;
+    max-width:620px;
+    color:var(--ink-2);
+    margin-bottom:48px;
+    font-weight:380;
+  }
+  .lede em{font-style:italic;color:var(--accent-deep)}
+  .meta-row{
+    display:flex;
+    gap:48px;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    border-top:1px solid var(--line);
+    padding-top:24px;
+    flex-wrap:wrap;
+  }
+  .meta-row div span{display:block;color:var(--ink);font-size:13px;margin-top:4px;letter-spacing:0.05em;text-transform:none}
+
+  /* chapter headers */
+  .chapter-num{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.22em;
+    color:var(--accent);
+    margin-bottom:24px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    text-transform:uppercase;
+  }
+  .chapter-num::before{
+    content:'';width:32px;height:1px;background:var(--accent);
+  }
+  h2{
+    font-family:var(--display);
+    font-size:clamp(40px,5.5vw,68px);
+    font-weight:400;
+    line-height:1.02;
+    letter-spacing:-0.015em;
+    margin-bottom:32px;
+    max-width:780px;
+  }
+  h2 em{font-style:italic;color:var(--accent)}
+  h3{
+    font-family:var(--display);
+    font-size:30px;
+    font-weight:400;
+    line-height:1.2;
+    margin:48px 0 20px;
+    color:var(--ink-2);
+  }
+  p{
+    margin-bottom:22px;
+    max-width:680px;
+  }
+  p.intro{
+    font-size:21px;
+    line-height:1.55;
+    color:var(--ink-2);
+    margin-bottom:40px;
+    max-width:720px;
+  }
+  code{
+    font-family:var(--mono);
+    font-size:0.86em;
+    background:var(--line-soft);
+    padding:2px 7px;
+    border-radius:3px;
+    color:var(--accent-deep);
+  }
+  .formula{
+    font-family:var(--mono);
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    padding:20px 28px;
+    margin:32px 0;
+    font-size:15.5px;
+    color:var(--ink-2);
+    overflow-x:auto;
+    border-left:3px solid var(--accent);
+  }
+  .formula b{color:var(--accent);font-weight:700}
+
+  /* card / panel */
+  .panel{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    padding:36px;
+    margin:40px 0;
+    position:relative;
+  }
+  .panel-label{
+    position:absolute;
+    top:-9px;
+    left:24px;
+    background:var(--bg);
+    padding:0 10px;
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:0.16em;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+  @media (max-width:640px){.panel{padding:24px 20px}}
+
+  /* tokenization demo */
+  .tok-input{
+    width:100%;
+    background:transparent;
+    border:none;
+    border-bottom:1.5px solid var(--ink);
+    font-family:var(--display);
+    font-size:34px;
+    color:var(--ink);
+    padding:14px 0 16px;
+    margin-bottom:28px;
+    outline:none;
+    font-weight:400;
+  }
+  .tok-input:focus{border-bottom-color:var(--accent)}
+  .tok-presets{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:32px;
+  }
+  .tok-presets button{
+    background:transparent;
+    border:1px solid var(--line);
+    padding:7px 14px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--muted);
+    cursor:pointer;
+    transition:all .2s;
+    letter-spacing:0.04em;
+  }
+  .tok-presets button:hover{
+    border-color:var(--accent);
+    color:var(--accent);
+    background:rgba(232,93,28,0.05);
+  }
+  .tok-output{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px 4px;
+    align-items:flex-start;
+    margin:24px 0 12px;
+    min-height:60px;
+  }
+  .tok{
+    display:inline-flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    padding:8px 12px 6px;
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    transition:all .2s;
+    cursor:default;
+    animation:popIn .3s ease-out backwards;
+  }
+  @keyframes popIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .tok:hover{
+    border-color:var(--accent);
+    background:rgba(232,93,28,0.06);
+    transform:translateY(-2px);
+  }
+  .tok .text{
+    font-family:var(--mono);
+    font-size:14px;
+    color:var(--ink);
+    white-space:pre;
+  }
+  .tok .id{
+    font-family:var(--mono);
+    font-size:9.5px;
+    color:var(--muted);
+    letter-spacing:0.04em;
+  }
+  .tok-stats{
+    display:flex;
+    gap:36px;
+    margin-top:18px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--muted);
+    border-top:1px dashed var(--line);
+    padding-top:16px;
+    flex-wrap:wrap;
+  }
+  .tok-stats b{color:var(--ink);font-weight:500;font-size:14px;display:block;margin-top:2px}
+
+  /* embedding & positional encoding viz */
+  .pe-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:32px;
+    margin-top:24px;
+  }
+  @media (max-width:720px){.pe-grid{grid-template-columns:1fr}}
+
+  .vec-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:6px;
+    font-family:var(--mono);
+    font-size:11px;
+  }
+  .vec-row .word{
+    width:60px;
+    text-align:right;
+    color:var(--muted);
+    font-size:11.5px;
+  }
+  .vec-cells{
+    display:flex;
+    gap:2px;
+  }
+  .vec-cell{
+    width:18px;
+    height:18px;
+    transition:all .2s;
+  }
+
+  /* attention visualization */
+  .att-stage{
+    margin:24px 0;
+  }
+  .att-tokens{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:28px;
+    padding-bottom:24px;
+    border-bottom:1px solid var(--line);
+  }
+  .att-token{
+    padding:12px 18px;
+    background:var(--bg-card);
+    border:1.5px solid var(--line);
+    font-family:var(--display);
+    font-size:22px;
+    cursor:pointer;
+    transition:all .2s;
+    user-select:none;
+  }
+  .att-token:hover{border-color:var(--accent)}
+  .att-token.active{
+    background:var(--accent);
+    color:var(--bg-card);
+    border-color:var(--accent);
+  }
+  .att-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+    margin-bottom:28px;
+  }
+  @media (max-width:720px){.att-grid{grid-template-columns:1fr}}
+  .qkv-card{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    padding:18px;
+  }
+  .qkv-card h4{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.18em;
+    color:var(--muted);
+    margin-bottom:4px;
+    text-transform:uppercase;
+  }
+  .qkv-card .qkv-name{
+    font-family:var(--display);
+    font-size:32px;
+    margin-bottom:14px;
+  }
+  .qkv-card.q .qkv-name{color:var(--accent)}
+  .qkv-card.k .qkv-name{color:var(--ink)}
+  .qkv-card.v .qkv-name{color:var(--muted)}
+  .qkv-row{display:flex;gap:2px;margin-bottom:2px}
+  .qkv-cell{width:14px;height:14px}
+  .qkv-desc{
+    font-size:13px;
+    color:var(--muted);
+    margin-top:14px;
+    line-height:1.5;
+    font-family:var(--serif);
+  }
+
+  /* attention bars */
+  .att-bars{margin-top:8px}
+  .att-bar-row{
+    display:grid;
+    grid-template-columns:80px 1fr 60px;
+    align-items:center;
+    gap:14px;
+    margin-bottom:8px;
+    font-family:var(--mono);
+    font-size:12px;
+  }
+  .att-bar-row .from{
+    font-family:var(--display);
+    font-size:18px;
+    text-align:right;
+    color:var(--ink);
+  }
+  .att-bar-track{
+    height:24px;
+    background:var(--line-soft);
+    position:relative;
+    overflow:hidden;
+  }
+  .att-bar-fill{
+    height:100%;
+    background:var(--accent);
+    transition:width .6s cubic-bezier(.2,.7,.2,1);
+    width:0;
+  }
+  .att-bar-row .pct{
+    color:var(--muted);
+    font-size:11px;
+    text-align:left;
+  }
+
+  /* attention SVG arrows */
+  .att-svg-wrap{
+    margin:24px 0;
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    padding:24px;
+  }
+
+  /* architecture */
+  .arch-svg-wrap{
+    margin:32px -8px;
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    padding:32px 16px;
+  }
+
+  /* generation */
+  .gen-stage{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    padding:30px;
+    margin-top:24px;
+  }
+  .gen-prompt-label{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:0.18em;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .gen-text{
+    font-family:var(--display);
+    font-size:30px;
+    line-height:1.45;
+    margin-bottom:24px;
+    color:var(--ink);
+    min-height:60px;
+  }
+  .gen-text .seed{color:var(--ink-2)}
+  .gen-text .new{
+    color:var(--accent);
+    animation:fadeIn .4s ease-out;
+    position:relative;
+  }
+  @keyframes fadeIn{
+    from{opacity:0;transform:translateY(-4px) scale(0.95)}
+    to{opacity:1;transform:translateY(0) scale(1)}
+  }
+  .gen-text .cursor{
+    display:inline-block;
+    width:14px;
+    height:1.1em;
+    background:var(--accent);
+    vertical-align:middle;
+    animation:blink 1s steps(2) infinite;
+    margin-left:2px;
+  }
+  @keyframes blink{50%{opacity:0}}
+  .gen-controls{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin-top:8px;
+  }
+  .btn{
+    background:var(--ink);
+    color:var(--bg-card);
+    border:none;
+    padding:13px 22px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:all .2s;
+  }
+  .btn:hover{background:var(--accent)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;background:var(--muted)}
+  .btn.alt{
+    background:transparent;
+    color:var(--ink);
+    border:1px solid var(--ink);
+  }
+  .btn.alt:hover{background:var(--ink);color:var(--bg-card)}
+
+  .candidates{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:6px;
+    margin-top:20px;
+    padding-top:20px;
+    border-top:1px dashed var(--line);
+  }
+  .candidate{
+    display:grid;
+    grid-template-columns:140px 1fr 60px;
+    gap:14px;
+    align-items:center;
+    font-family:var(--mono);
+    font-size:12px;
+    transition:all .2s;
+    padding:6px 4px;
+  }
+  .candidate.chosen{background:rgba(232,93,28,0.07)}
+  .candidate .word{
+    font-family:var(--display);
+    font-size:18px;
+    text-align:right;
+    color:var(--ink);
+  }
+  .candidate.chosen .word{color:var(--accent);font-style:italic}
+  .candidate .track{
+    height:20px;
+    background:var(--line-soft);
+    position:relative;
+  }
+  .candidate .fill{
+    height:100%;
+    background:var(--muted);
+    transition:width .5s ease-out;
+  }
+  .candidate.chosen .fill{background:var(--accent)}
+  .candidate .pct{color:var(--muted);font-size:11px}
+
+  .gen-info{
+    display:flex;
+    gap:32px;
+    margin-top:24px;
+    padding-top:18px;
+    border-top:1px solid var(--line);
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    flex-wrap:wrap;
+  }
+  .gen-info b{color:var(--ink);font-weight:500}
+
+  /* aside / pull-quote */
+  .pullquote{
+    font-family:var(--display);
+    font-style:italic;
+    font-size:34px;
+    line-height:1.25;
+    color:var(--accent-deep);
+    margin:64px 0;
+    padding-left:32px;
+    border-left:3px solid var(--accent);
+    max-width:760px;
+  }
+
+  /* footer */
+  footer{
+    border-top:1px solid var(--line);
+    margin-top:120px;
+    padding:48px 32px 80px;
+    max-width:920px;
+    margin-left:auto;
+    margin-right:auto;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:var(--muted);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:24px;
+  }
+  footer .sig{font-style:italic;font-family:var(--display);font-size:16px;letter-spacing:0;color:var(--ink-2);text-transform:none}
+
+  /* progress bar */
+  .progress{
+    position:fixed;
+    top:0;left:0;right:0;
+    height:2px;
+    background:transparent;
+    z-index:100;
+  }
+  .progress-fill{
+    height:100%;
+    background:var(--accent);
+    width:0;
+    transition:width .1s linear;
+  }
+
+  /* scroll reveal */
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease-out, transform .8s ease-out}
+  .reveal.in{opacity:1;transform:translateY(0)}
+
+  /* legend */
+  .legend{
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    margin-top:14px;
+  }
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{display:inline-block;width:12px;height:12px}
+</style>
+</head>
+<body>
+
+<div class="progress"><div class="progress-fill" id="progress"></div></div>
+
+<nav class="rail">
+  <a href="#hero" data-section="hero"><span class="dot"></span><span class="label">Intro</span></a>
+  <a href="#tokens" data-section="tokens"><span class="dot"></span><span class="label">01 · Tokens</span></a>
+  <a href="#embed" data-section="embed"><span class="dot"></span><span class="label">02 · Embeddings</span></a>
+  <a href="#attention" data-section="attention"><span class="dot"></span><span class="label">03 · Attention</span></a>
+  <a href="#archi" data-section="archi"><span class="dot"></span><span class="label">04 · Architecture</span></a>
+  <a href="#generate" data-section="generate"><span class="dot"></span><span class="label">05 · Génération</span></a>
+</nav>
+
+<main>
+
+<!-- ============== HERO ============== -->
+<section id="hero" class="hero">
+  <div class="eyebrow">Visualisation interactive · 2026</div>
+  <h1 class="title">Comment fonctionne<br>un <em>grand modèle</em><br>de langage.</h1>
+  <p class="lede">Une plongée visuelle dans l'architecture <em>Transformer</em> — de la phrase brute jusqu'au mot généré, en passant par la tokenisation, le calcul du <em>self-attention</em>, et la génération autoregressive.</p>
+  <div class="meta-row">
+    <div>Lecture<span>~12 minutes</span></div>
+    <div>Niveau<span>Intermédiaire</span></div>
+    <div>Format<span>Interactif</span></div>
+    <div>Architecture<span>Transformer décodeur</span></div>
+  </div>
+</section>
+
+<!-- ============== CHAPTER 1: TOKENIZATION ============== -->
+<section id="tokens">
+  <div class="chapter-num reveal">Chapitre 01</div>
+  <h2 class="reveal">D'abord, on découpe.<br><em>La tokenisation.</em></h2>
+  <p class="intro reveal">Un modèle de langage ne lit pas les phrases comme nous. Avant tout calcul, le texte est fragmenté en <code>tokens</code> — des morceaux de mots, parfois plus petits qu'une syllabe — puis chacun reçoit un <em>identifiant numérique unique</em> tiré d'un vocabulaire fixe (typiquement entre 50 000 et 200 000 entrées).</p>
+
+  <p class="reveal">Les algorithmes modernes comme <code>BPE</code> (Byte-Pair Encoding) ou <code>SentencePiece</code> apprennent à découper le texte de manière efficace : les mots fréquents restent entiers, les mots rares sont fragmentés en sous-unités. Tapez votre propre phrase ci-dessous pour voir le découpage.</p>
+
+  <div class="panel reveal">
+    <div class="panel-label">Démonstration interactive</div>
+    <input type="text" class="tok-input" id="tokInput" value="Le chat dort sur le tapis." spellcheck="false">
+    <div class="tok-presets">
+      <button data-text="Le chat dort sur le tapis.">Phrase simple</button>
+      <button data-text="L'anticonstitutionnellement reste un mot rare.">Mot rare</button>
+      <button data-text="Bonjour 👋 ça va aujourd'hui ?">Avec emoji</button>
+      <button data-text="def fibonacci(n): return n if n < 2 else fib(n-1)+fib(n-2)">Code Python</button>
+    </div>
+    <div class="tok-output" id="tokOutput"></div>
+    <div class="tok-stats">
+      <div>Caractères<b id="charCount">26</b></div>
+      <div>Tokens<b id="tokCount">7</b></div>
+      <div>Ratio<b id="tokRatio">3.7 car/tok</b></div>
+      <div>Vocabulaire simulé<b>~50 000 entrées</b></div>
+    </div>
+  </div>
+
+  <p class="reveal" style="font-size:14.5px;color:var(--muted);font-style:italic;border-left:1px solid var(--line);padding:6px 0 6px 18px;margin-top:28px;line-height:1.55">
+    Note — la démonstration ci-dessus est une <em>simulation pédagogique</em> : le découpage et les identifiants ne reflètent pas un vrai tokenizer entraîné. Pour explorer le comportement réel des tokenizers de GPT-4, Claude, Llama ou Mistral, voyez <a href="https://tiktokenizer.vercel.app/" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent)">tiktokenizer.vercel.app</a>.
+  </p>
+
+  <p class="reveal">Notez comme les mots courants (« le », « chat ») restent entiers, alors que les mots longs ou rares sont fragmentés. Cette compression intelligente permet au modèle de traiter <em>n'importe quel</em> texte — même un mot inconnu se décompose en sous-unités connues.</p>
+</section>
+
+<!-- ============== CHAPTER 2: EMBEDDINGS + POSITIONAL ============== -->
+<section id="embed">
+  <div class="chapter-num reveal">Chapitre 02</div>
+  <h2 class="reveal">Chaque token devient<br>un <em>vecteur</em>.</h2>
+  <p class="intro reveal">Les identifiants numériques bruts ne suffisent pas — ils ne disent rien sur le sens des mots. Chaque token est donc projeté dans un espace continu de haute dimension (souvent 768, 4096, voire 12 288 dimensions). C'est l'<em>embedding</em>.</p>
+
+  <p class="reveal">Dans cet espace, deux mots dont les sens sont proches occupent des positions voisines. Ces vecteurs sont appris pendant l'entraînement : ils encodent une géométrie sémantique du langage.</p>
+
+  <div class="panel reveal">
+    <div class="panel-label">Embedding : token → vecteur</div>
+    <div id="embedViz"></div>
+    <div class="legend">
+      <span><i style="background:#1A1A1A"></i>valeur négative</span>
+      <span><i style="background:#FFFFFF;border:1px solid var(--line)"></i>≈ zéro</span>
+      <span><i style="background:#E85D1C"></i>valeur positive</span>
+      <span style="color:var(--ink);margin-left:auto">dimension <b style="color:var(--accent)">d = 32</b> (réduite pour l'affichage)</span>
+    </div>
+  </div>
+
+  <h3 class="reveal">Mais l'ordre compte.<br><em>L'encodage positionnel.</em></h3>
+  <p class="reveal">Problème : le mécanisme d'attention que nous verrons bientôt traite tous les tokens en parallèle — il ne distingue pas <code>« Le chien mord l'homme »</code> de <code>« L'homme mord le chien »</code>. Pour préserver l'ordre, on <em>ajoute</em> à chaque embedding un signal positionnel.</p>
+
+  <div class="formula reveal">
+    PE(pos, 2i)   = <b>sin</b>( pos / 10000<sup>2i/d</sup> )<br>
+    PE(pos, 2i+1) = <b>cos</b>( pos / 10000<sup>2i/d</sup> )
+  </div>
+
+  <p class="reveal">Cette formule sinusoïdale, proposée dans le papier original « <em>Attention Is All You Need</em> » (2017), produit pour chaque position un motif unique de fréquences. Le résultat est ajouté terme à terme à l'embedding du token. Ainsi, le mot <code>« chat »</code> en position 2 et le mot <code>« chat »</code> en position 5 deviennent deux vecteurs <em>distincts</em>.</p>
+
+  <div class="panel reveal">
+    <div class="panel-label">Encodage positionnel sinusoïdal</div>
+    <div id="peCanvas"></div>
+    <div class="legend">
+      <span style="color:var(--ink)">L'axe horizontal : position dans la phrase (0 → 31)</span>
+      <span style="color:var(--ink);margin-left:auto">L'axe vertical : dimension du vecteur (0 → 31)</span>
+    </div>
+  </div>
+
+  <p class="reveal">Chaque colonne est <em>l'empreinte de position</em> ajoutée au token correspondant. Les premières dimensions oscillent rapidement (encodent le voisinage immédiat), les dernières changent lentement (encodent la position globale).</p>
+</section>
+
+<!-- ============== CHAPTER 3: SELF-ATTENTION ============== -->
+<section id="attention">
+  <div class="chapter-num reveal">Chapitre 03</div>
+  <h2 class="reveal">Le cœur du Transformer :<br><em>self-attention.</em></h2>
+  <p class="intro reveal">Pour chaque token, le modèle se demande : <em>de quels autres mots de la phrase ai-je besoin pour me comprendre ?</em> C'est le <em>self-attention</em>. Il transforme un vecteur isolé en un vecteur enrichi par tout son contexte.</p>
+
+  <p class="reveal">Le mécanisme repose sur trois projections apprises de chaque vecteur d'entrée — trois rôles distincts joués simultanément :</p>
+
+  <div class="att-grid reveal">
+    <div class="qkv-card q">
+      <h4>Matrice Wq</h4>
+      <div class="qkv-name">Q · Query</div>
+      <div id="qMat"></div>
+      <div class="qkv-desc">« Qu'est-ce que je cherche dans le contexte ? » — la <em>requête</em> émise par le token.</div>
+    </div>
+    <div class="qkv-card k">
+      <h4>Matrice Wk</h4>
+      <div class="qkv-name">K · Key</div>
+      <div id="kMat"></div>
+      <div class="qkv-desc">« Qu'est-ce que j'offre comme information ? » — la <em>clé</em> qui annonce le contenu disponible.</div>
+    </div>
+    <div class="qkv-card v">
+      <h4>Matrice Wv</h4>
+      <div class="qkv-name">V · Value</div>
+      <div id="vMat"></div>
+      <div class="qkv-desc">« Qu'est-ce que je transmets si on me sélectionne ? » — la <em>valeur</em> récupérée.</div>
+    </div>
+  </div>
+
+  <p class="reveal">Pour chaque paire de tokens, on calcule un score d'attention via le produit scalaire de la query de l'un avec la key de l'autre. Plus le produit est élevé, plus les deux tokens sont « pertinents » l'un pour l'autre.</p>
+
+  <div class="formula reveal">
+    Attention(Q, K, V) = <b>softmax</b>( Q · K<sup>T</sup> / √d<sub>k</sub> ) · V
+  </div>
+
+  <p class="reveal">Trois étapes : <b>(1)</b> produit <code>Q·Kᵀ</code> pour obtenir une matrice de scores ; <b>(2)</b> division par <code>√dₖ</code> pour stabiliser les gradients ; <b>(3)</b> <code>softmax</code> qui normalise chaque ligne en distribution de probabilité ; <b>(4)</b> multiplication par <code>V</code> pour obtenir une moyenne pondérée des valeurs.</p>
+
+  <div class="panel reveal">
+    <div class="panel-label">Démonstration : cliquez sur un token</div>
+    <div class="att-stage">
+      <p style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:12px">Cliquez sur un mot pour voir <b style="color:var(--accent)">comment il regarde</b> les autres tokens de la phrase :</p>
+      <div class="att-tokens" id="attTokens"></div>
+      <div id="attSvg"></div>
+      <h4 style="font-family:var(--mono);font-size:11px;letter-spacing:0.16em;color:var(--muted);margin:24px 0 14px;text-transform:uppercase">Poids d'attention <span id="attTitle" style="color:var(--accent)"></span></h4>
+      <div class="att-bars" id="attBars"></div>
+    </div>
+  </div>
+
+  <p class="reveal">Le mécanisme est en réalité <em>multi-têtes</em> : on l'applique en parallèle 8, 16 ou 32 fois avec des matrices Wq/Wk/Wv différentes, chaque « tête » apprenant à capter un type de relation distinct — syntaxique, sémantique, coréférentielle, etc. Les sorties sont ensuite concaténées.</p>
+
+  <div class="pullquote reveal">« Le sens d'un mot, c'est la moyenne pondérée des sens de ses voisins. »</div>
+</section>
+
+<!-- ============== CHAPTER 4: ARCHITECTURE ============== -->
+<section id="archi">
+  <div class="chapter-num reveal">Chapitre 04</div>
+  <h2 class="reveal">L'architecture<br><em>au complet.</em></h2>
+  <p class="intro reveal">Le self-attention n'est qu'une brique. Un Transformer empile <em>N</em> blocs identiques (typiquement 12, 24, 32, parfois plus de 100), chacun composé d'une couche d'attention multi-têtes et d'un réseau feed-forward, le tout entrelacé de connexions résiduelles et de normalisations.</p>
+
+  <div class="arch-svg-wrap reveal">
+    <div class="panel-label" style="position:relative;left:8px;top:-22px;background:var(--bg-card)">Bloc Transformer · répété N fois</div>
+    <div id="archSvg"></div>
+  </div>
+
+  <p class="reveal">Les <em>connexions résiduelles</em> (les flèches qui contournent chaque sous-couche) permettent au gradient de circuler sans s'évanouir, même à travers 100 couches. La <em>normalisation</em> stabilise la distribution des activations. Le <em>réseau feed-forward</em> — deux projections linéaires séparées par une non-linéarité — augmente la capacité de calcul du modèle.</p>
+
+  <p class="reveal">Empilez 32 de ces blocs, ajoutez 4 096 dimensions d'embedding, et entraînez le tout sur 15 trillions de tokens : vous obtenez un modèle de l'ordre de 70 milliards de paramètres, capable d'écrire, raisonner, traduire, coder.</p>
+</section>
+
+<!-- ============== CHAPTER 5: GENERATION ============== -->
+<section id="generate">
+  <div class="chapter-num reveal">Chapitre 05</div>
+  <h2 class="reveal">Enfin, on génère.<br><em>Un token à la fois.</em></h2>
+  <p class="intro reveal">Un LLM <em>autoregressif</em> ne produit jamais une phrase entière d'un coup. Il prédit un seul token à la fois : il calcule pour chaque entrée du vocabulaire la probabilité d'être le mot suivant, en choisit un, l'ajoute à la séquence, puis recommence — encore et encore.</p>
+
+  <p class="reveal">Cliquez sur <code>Token suivant</code> pour observer ce processus pas à pas. Chaque clic montre les <em>cinq candidats les plus probables</em> et le choix retenu :</p>
+
+  <div class="gen-stage reveal">
+    <div class="gen-prompt-label">Séquence en construction</div>
+    <div class="gen-text" id="genText"></div>
+    <div class="gen-controls">
+      <button class="btn" id="genStep">Token suivant ↗</button>
+      <button class="btn alt" id="genAuto">Auto</button>
+      <button class="btn alt" id="genReset">Réinitialiser</button>
+    </div>
+    <div class="candidates" id="genCandidates"></div>
+    <div class="gen-info">
+      <div>Étape<b id="genStepCount">0</b></div>
+      <div>Tokens générés<b id="genGenerated">0</b></div>
+      <div>Stratégie<b>greedy (top-1)</b></div>
+      <div>Température<b>T = 0.7</b></div>
+    </div>
+  </div>
+
+  <p class="reveal">Cette boucle — appelée <em>décodage autoregressif</em> — est ce qui crée l'illusion d'une réflexion fluide. Chaque token généré est <em>réintroduit en entrée</em> pour calculer le suivant, et l'ensemble du contexte (prompt + tokens déjà générés) est repassé à travers <em>toutes</em> les couches du Transformer à chaque étape.</p>
+
+  <p class="reveal">En pratique on n'utilise pas toujours le mot le plus probable (<em>greedy</em>) : on échantillonne dans la distribution avec une <code>température</code> qui contrôle l'aléa, ou on garde uniquement les <code>top-k</code> ou <code>top-p</code> candidats. C'est ce qui rend les réponses créatives — et parfois imprévisibles.</p>
+
+  <div class="pullquote reveal">« Tout ce qu'un LLM sait faire, c'est <em>compléter</em>. Le reste est émergence. »</div>
+
+  <p class="reveal" style="margin-top:48px">Et c'est tout. Tokenisation → embedding → encodage positionnel → couches d'attention multi-têtes → feed-forward → logits → softmax → token suivant. Un cycle simple, répété des milliers de fois par seconde, sur des matrices de plusieurs gigaoctets.</p>
+
+  <p class="reveal">L'intelligence apparente émerge de cette mécanique élégante — et de la quantité astronomique de données vues pendant l'entraînement.</p>
+</section>
+
+<footer>
+  <span>Visualisation pédagogique · architecture Transformer décodeur</span>
+  <span class="sig">Fait avec Claude</span>
+</footer>
+
+</main>
+
+<script>
+/* ============================================================
+   DATA & UTILS
+============================================================ */
+
+const rand = (seed => () => (seed = (seed*9301 + 49297) % 233280) / 233280)(42);
+function pseudoRand(s){ let h = 2166136261; for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)} return ((h>>>0)%100000)/100000; }
+
+/* ============================================================
+   1. TOKENIZATION
+   Simple BPE-like simulation — reasonable visual approximation
+============================================================ */
+function fakeTokenize(text){
+  if(!text) return [];
+  // splits on word boundaries, keeps spaces attached to following word, splits long/rare words
+  const tokens = [];
+  // First: split into "words" with leading space attached
+  const re = /(\s*)(\S+)/g;
+  let m;
+  const wordChunks = [];
+  while((m = re.exec(text))){
+    wordChunks.push(m[1] + m[2]);
+  }
+  // any trailing whitespace
+  const trailMatch = text.match(/\s+$/);
+  if(trailMatch && wordChunks.length===0) wordChunks.push(trailMatch[0]);
+
+  const commonWords = new Set(['le',' le',' la',' les',' un',' une',' des',' et',' ou',' à',' de',' du',' en',' est',' sur',' dans',' sous',' avec',' sans',' que',' qui',' pour',' ce',' ça',' va',' aujourd',' chat',' chien',' tapis',' dort',' rare',' mot',' reste',' un',' restent','le','la','les','de','du','un','une','et','est',' bonjour']);
+
+  for(const chunk of wordChunks){
+    // Punctuation handling: split trailing punctuation
+    const punctMatch = chunk.match(/^(.*?)([.,!?:;'»«]*)$/);
+    let core = chunk;
+    let punct = '';
+    if(punctMatch){
+      core = punctMatch[1];
+      punct = punctMatch[2];
+    }
+
+    if(core){
+      const lower = core.toLowerCase();
+      if(commonWords.has(lower) || lower.length <= 4){
+        tokens.push(core);
+      } else if(/^\s*[A-Za-z][A-Za-z']+$/.test(core) && core.replace(/^\s+/,'').length > 7){
+        // long word: split into stem + suffix-ish chunks
+        const noSpace = core.replace(/^(\s*)/, '');
+        const lead = core.match(/^\s*/)[0];
+        // chunk by ~4-5 chars
+        const chunks = [];
+        let i = 0;
+        while(i < noSpace.length){
+          const size = (i===0 ? 5 : 4) + (i>0 ? Math.floor(pseudoRand(noSpace.slice(i,i+3))*2) : 0);
+          chunks.push(noSpace.slice(i, i+size));
+          i += size;
+        }
+        chunks[0] = lead + chunks[0];
+        chunks.forEach(c => tokens.push(c));
+      } else if(/[\u{1F300}-\u{1FAFF}]|[\u2600-\u27BF]/u.test(core)){
+        // emoji or symbol: each emoji is its own token typically
+        const parts = Array.from(core);
+        let buf = '';
+        for(const p of parts){
+          if(/[\u{1F300}-\u{1FAFF}]|[\u2600-\u27BF]/u.test(p)){
+            if(buf){ tokens.push(buf); buf=''; }
+            tokens.push(p);
+          } else {
+            buf += p;
+          }
+        }
+        if(buf) tokens.push(buf);
+      } else if(/[A-Za-z_]\w*\(.*\)/.test(core) || /[():\[\]{}=<>+\-*\/]/.test(core)){
+        // code-like: split on operators/parens
+        const parts = core.split(/([():\[\]{}=<>+\-*\/,])/g).filter(Boolean);
+        for(const p of parts){
+          if(p.length > 5){
+            // split chunks
+            for(let i=0;i<p.length;i+=4) tokens.push(p.slice(i,i+4));
+          } else if(p.trim()){
+            tokens.push(p);
+          } else if(p===' '){
+            // skip empty bits
+          } else {
+            tokens.push(p);
+          }
+        }
+      } else {
+        tokens.push(core);
+      }
+    }
+    if(punct){
+      // each punctuation as a separate token
+      for(const p of punct) tokens.push(p);
+    }
+  }
+  return tokens;
+}
+
+function tokenIdFor(s){
+  // Stable pseudo-random ID 0-49999
+  return Math.floor(pseudoRand('id:'+s) * 49997) + 3;
+}
+
+const tokInput = document.getElementById('tokInput');
+const tokOutput = document.getElementById('tokOutput');
+const charCount = document.getElementById('charCount');
+const tokCount = document.getElementById('tokCount');
+const tokRatio = document.getElementById('tokRatio');
+
+function renderTokens(){
+  const text = tokInput.value;
+  const toks = fakeTokenize(text);
+  tokOutput.innerHTML = '';
+  toks.forEach((t,i)=>{
+    const div = document.createElement('div');
+    div.className = 'tok';
+    div.style.animationDelay = (i*0.025)+'s';
+    const display = t.replace(/^\s/, '·').replace(/\s/g, '·');
+    div.innerHTML = `<span class="text">${escapeHtml(display)}</span><span class="id">#${tokenIdFor(t)}</span>`;
+    tokOutput.appendChild(div);
+  });
+  charCount.textContent = text.length;
+  tokCount.textContent = toks.length;
+  tokRatio.textContent = toks.length ? (text.length/toks.length).toFixed(1) + ' car/tok' : '–';
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]);
+}
+
+tokInput.addEventListener('input', renderTokens);
+document.querySelectorAll('.tok-presets button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    tokInput.value = b.dataset.text;
+    renderTokens();
+  });
+});
+renderTokens();
+
+/* ============================================================
+   2. EMBEDDINGS + POSITIONAL ENCODING
+============================================================ */
+
+const exampleTokens = ['Le', ' chat', ' dort', ' sur', ' le', ' tapis'];
+const D = 32;
+function valueToColor(v){
+  // v in [-1, 1]
+  // positive -> white to orange ; negative -> white to dark gray
+  const t = Math.max(-1, Math.min(1, v));
+  if(t > 0){
+    // #FFFFFF -> #E85D1C
+    const r = 255 + (232-255)*t;
+    const g = 255 + (93-255)*t;
+    const b = 255 + (28-255)*t;
+    return `rgb(${r|0},${g|0},${b|0})`;
+  } else {
+    const a = -t;
+    // #FFFFFF -> #1A1A1A
+    const r = 255 + (26-255)*a;
+    const g = 255 + (26-255)*a;
+    const b = 255 + (26-255)*a;
+    return `rgb(${r|0},${g|0},${b|0})`;
+  }
+}
+
+function buildEmbedViz(){
+  const root = document.getElementById('embedViz');
+  root.innerHTML = '';
+  exampleTokens.forEach((tok, idx)=>{
+    const row = document.createElement('div');
+    row.className = 'vec-row';
+    const w = document.createElement('div');
+    w.className = 'word';
+    w.textContent = tok.replace(/^\s/,'·');
+    row.appendChild(w);
+    const cells = document.createElement('div');
+    cells.className = 'vec-cells';
+    for(let d=0; d<D; d++){
+      const c = document.createElement('div');
+      c.className = 'vec-cell';
+      // pseudo-random embedding values, deterministic per token
+      const v = (pseudoRand(tok+':'+d) * 2 - 1);
+      c.style.background = valueToColor(v);
+      c.title = `dim ${d}: ${v.toFixed(2)}`;
+      cells.appendChild(c);
+    }
+    row.appendChild(cells);
+    root.appendChild(row);
+  });
+}
+buildEmbedViz();
+
+function buildPositionalEncoding(){
+  const root = document.getElementById('peCanvas');
+  root.innerHTML = '';
+  const N_POS = 32, N_DIM = 32;
+  const cellSize = 16;
+  const svgW = N_POS * cellSize;
+  const svgH = N_DIM * cellSize;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
+  svg.setAttribute('width', '100%');
+  svg.style.maxWidth = svgW+'px';
+  svg.style.display = 'block';
+  svg.style.margin = '0 auto';
+  for(let pos=0; pos<N_POS; pos++){
+    for(let i=0; i<N_DIM; i++){
+      let val;
+      if(i % 2 === 0){
+        val = Math.sin(pos / Math.pow(10000, i / N_DIM));
+      } else {
+        val = Math.cos(pos / Math.pow(10000, (i-1) / N_DIM));
+      }
+      const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      r.setAttribute('x', pos * cellSize);
+      r.setAttribute('y', i * cellSize);
+      r.setAttribute('width', cellSize);
+      r.setAttribute('height', cellSize);
+      r.setAttribute('fill', valueToColor(val));
+      svg.appendChild(r);
+    }
+  }
+  root.appendChild(svg);
+}
+buildPositionalEncoding();
+
+/* ============================================================
+   3. SELF-ATTENTION
+============================================================ */
+
+const attTokens = ['Le', 'chat', 'dort', 'sur', 'le', 'tapis'];
+// Predefined attention weights: row = query, col = key
+// Designed to be plausible (the query attends to itself + semantically related)
+const attWeights = [
+  // Le      chat   dort    sur    le    tapis
+  [0.42,   0.31,   0.08,  0.05,  0.05,  0.09],  // "Le" -> mostly self + chat (article-noun)
+  [0.20,   0.46,   0.18,  0.04,  0.02,  0.10],  // "chat" -> self + Le + verb
+  [0.06,   0.40,   0.32,  0.08,  0.04,  0.10],  // "dort" -> chat (subject) + self
+  [0.04,   0.10,   0.18,  0.30,  0.10,  0.28],  // "sur" -> tapis + self + dort
+  [0.06,   0.08,   0.06,  0.08,  0.30,  0.42],  // "le" (article) -> tapis (its noun)
+  [0.05,   0.18,   0.16,  0.20,  0.18,  0.23],  // "tapis" -> spread across context
+];
+
+function buildQKVMatrices(){
+  const cellsPerRow = 8;
+  const rows = 6;
+  ['q','k','v'].forEach((kind, kidx)=>{
+    const root = document.getElementById(kind+'Mat');
+    root.innerHTML = '';
+    for(let r=0; r<rows; r++){
+      const row = document.createElement('div');
+      row.className = 'qkv-row';
+      for(let c=0; c<cellsPerRow; c++){
+        const cell = document.createElement('div');
+        cell.className = 'qkv-cell';
+        const v = pseudoRand(`${kind}:${r}:${c}`)*2-1;
+        let color;
+        if(kind==='q') color = valueToColor(v); // orange/gray ramp (signed)
+        else if(kind==='k'){
+          // dark gray ramp (white -> near-black)
+          const t = Math.abs(v);
+          const r2 = 255 + (26-255)*t;
+          color = `rgb(${r2|0},${r2|0},${r2|0})`;
+        } else {
+          // medium gray ramp (white -> #7A7A7A)
+          const t = Math.abs(v);
+          const r2 = 255 + (122-255)*t;
+          color = `rgb(${r2|0},${r2|0},${r2|0})`;
+        }
+        cell.style.background = color;
+        row.appendChild(cell);
+      }
+      root.appendChild(row);
+    }
+  });
+}
+buildQKVMatrices();
+
+const attTokensEl = document.getElementById('attTokens');
+const attBars = document.getElementById('attBars');
+const attTitle = document.getElementById('attTitle');
+let activeQuery = 1; // start with "chat"
+
+function renderAttTokens(){
+  attTokensEl.innerHTML = '';
+  attTokens.forEach((t,i)=>{
+    const el = document.createElement('div');
+    el.className = 'att-token' + (i===activeQuery ? ' active' : '');
+    el.textContent = t;
+    el.addEventListener('click', ()=>{
+      activeQuery = i;
+      renderAttTokens();
+      renderAttBars();
+      drawAttArrows();
+    });
+    attTokensEl.appendChild(el);
+  });
+}
+
+function renderAttBars(){
+  const weights = attWeights[activeQuery];
+  attTitle.textContent = `depuis « ${attTokens[activeQuery]} »`;
+  attBars.innerHTML = '';
+  weights.forEach((w, i)=>{
+    const row = document.createElement('div');
+    row.className = 'att-bar-row';
+    row.innerHTML = `
+      <div class="from">${attTokens[i]}</div>
+      <div class="att-bar-track"><div class="att-bar-fill" style="width:0%"></div></div>
+      <div class="pct">${(w*100).toFixed(1)} %</div>
+    `;
+    attBars.appendChild(row);
+    // animate
+    setTimeout(()=>{
+      row.querySelector('.att-bar-fill').style.width = (w*100)+'%';
+    }, 30 + i*40);
+  });
+}
+
+function drawAttArrows(){
+  const root = document.getElementById('attSvg');
+  const weights = attWeights[activeQuery];
+  const W = 680, H = 130;
+  const tokenY = 40, ctxY = 105;
+  const xs = attTokens.map((_,i) => 60 + i * ((W-120)/(attTokens.length-1)));
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">`;
+  // arrows from query to each key, opacity = weight
+  weights.forEach((w, i)=>{
+    if(w < 0.04) return;
+    const sw = 0.6 + w * 8;
+    const op = 0.18 + w * 0.85;
+    svg += `<path d="M ${xs[activeQuery]} ${tokenY} Q ${(xs[activeQuery]+xs[i])/2} ${(tokenY+ctxY)/2 - 15} ${xs[i]} ${ctxY}" fill="none" stroke="#E85D1C" stroke-width="${sw}" stroke-linecap="round" opacity="${op}"/>`;
+  });
+  // bottom row: target tokens
+  attTokens.forEach((t,i)=>{
+    const isQ = i === activeQuery;
+    svg += `<text x="${xs[i]}" y="${ctxY + 16}" text-anchor="middle" font-family="Instrument Serif, Georgia, serif" font-size="16" fill="${isQ ? '#E85D1C' : '#6B6B6B'}" font-style="italic">${t}</text>`;
+  });
+  // top: query token highlighted
+  svg += `<circle cx="${xs[activeQuery]}" cy="${tokenY}" r="20" fill="#E85D1C"/>`;
+  svg += `<text x="${xs[activeQuery]}" y="${tokenY+5}" text-anchor="middle" font-family="Instrument Serif, Georgia, serif" font-size="15" fill="#FFFFFF" font-style="italic">${attTokens[activeQuery]}</text>`;
+  svg += `<text x="${xs[activeQuery]}" y="${tokenY-30}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#E85D1C" letter-spacing="0.16em">QUERY</text>`;
+  svg += `<text x="${W/2}" y="${ctxY-25}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#6B6B6B" letter-spacing="0.16em">KEYS / VALUES</text>`;
+
+  svg += `</svg>`;
+  root.innerHTML = svg;
+}
+
+renderAttTokens();
+renderAttBars();
+drawAttArrows();
+
+/* ============================================================
+   4. ARCHITECTURE DIAGRAM
+============================================================ */
+
+function buildArchitecture(){
+  const root = document.getElementById('archSvg');
+  const W = 720, H = 720;
+  const cx = W/2;
+
+  const blocks = [
+    {y: 60,  label: 'Tokens d\'entrée', sub: '« Le chat dort … »', color: '#6B6B6B', text:'#FFFFFF'},
+    {y: 130, label: 'Embedding + Position', sub: 'token → vecteur', color: '#1A1A1A', text:'#FFFFFF'},
+  ];
+  // Transformer block:
+  const blockY = 220;
+  const blockH = 360;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;max-width:${W}px;margin:0 auto">`;
+
+  // arrows
+  function arrow(x1,y1,x2,y2,col='#6B6B6B',dashed=false){
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="1.2" ${dashed?'stroke-dasharray="4 3"':''} marker-end="url(#archArrow)"/>`;
+  }
+  // marker
+  svg += `<defs><marker id="archArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`;
+
+  // Top boxes
+  blocks.forEach(b=>{
+    svg += `<rect x="${cx-130}" y="${b.y}" width="260" height="50" fill="${b.color}" rx="2"/>`;
+    svg += `<text x="${cx}" y="${b.y+22}" text-anchor="middle" font-family="Instrument Serif, Georgia, serif" font-size="18" fill="${b.text}" font-style="italic">${b.label}</text>`;
+    svg += `<text x="${cx}" y="${b.y+40}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="${b.text}" opacity="0.7" letter-spacing="0.1em">${b.sub}</text>`;
+  });
+  svg += arrow(cx, 110, cx, 130);
+  svg += arrow(cx, 180, cx, 220);
+
+  // Transformer block container — dashed
+  svg += `<rect x="${cx-220}" y="${blockY}" width="440" height="${blockH}" fill="none" stroke="#E85D1C" stroke-width="1.2" stroke-dasharray="6 4" rx="3"/>`;
+  svg += `<text x="${cx-220}" y="${blockY-8}" font-family="JetBrains Mono, monospace" font-size="10" fill="#E85D1C" letter-spacing="0.16em">BLOC TRANSFORMER × N</text>`;
+
+  // Inside: layer norm 1
+  let y = blockY + 30;
+  function innerBox(label, sub, fill, textCol){
+    svg += `<rect x="${cx-160}" y="${y}" width="320" height="44" fill="${fill}" rx="2"/>`;
+    svg += `<text x="${cx}" y="${y+19}" text-anchor="middle" font-family="Instrument Serif, Georgia, serif" font-size="16" fill="${textCol}" font-style="italic">${label}</text>`;
+    if(sub){
+      svg += `<text x="${cx}" y="${y+35}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="${textCol}" opacity="0.75" letter-spacing="0.08em">${sub}</text>`;
+    }
+    y += 44;
+  }
+  innerBox('LayerNorm', 'normalisation', '#F0F0EE', '#111111');
+  // residual line will be drawn over
+  const resStartY = y;
+  y += 8;
+  innerBox('Multi-Head Attention', 'Q · Kᵀ · V — sur 16 têtes', '#E85D1C', '#FFFFFF');
+  y += 8;
+  // residual junction
+  const resEndY = y;
+  innerBox('+ Residual', 'connexion sautée', '#F0F0EE', '#6B6B6B');
+
+  y += 8;
+  innerBox('LayerNorm', 'normalisation', '#F0F0EE', '#111111');
+  const res2StartY = y;
+  y += 8;
+  innerBox('Feed-Forward', 'deux projections + GELU', '#3A3A3A', '#FFFFFF');
+  y += 8;
+  const res2EndY = y;
+  innerBox('+ Residual', 'connexion sautée', '#F0F0EE', '#6B6B6B');
+
+  // Residual lines (curved on right side) — both in subtle gray
+  svg += `<path d="M ${cx+160} ${resStartY-22} Q ${cx+220} ${(resStartY+resEndY)/2} ${cx+160} ${resEndY+22}" fill="none" stroke="#6B6B6B" stroke-width="1" stroke-dasharray="3 3" opacity="0.7"/>`;
+  svg += `<path d="M ${cx+160} ${res2StartY-22} Q ${cx+220} ${(res2StartY+res2EndY)/2} ${cx+160} ${res2EndY+22}" fill="none" stroke="#6B6B6B" stroke-width="1" stroke-dasharray="3 3" opacity="0.7"/>`;
+
+  // arrows between sub-boxes
+  let prevY = blockY + 30 + 44;
+  for(let i=0;i<5;i++){
+    const ay1 = blockY + 30 + 44 + i*52;
+    const ay2 = ay1 + 8;
+    svg += arrow(cx, ay1, cx, ay2);
+  }
+  // arrow from transformer block to next
+  svg += arrow(cx, blockY + blockH, cx, blockY + blockH + 30);
+
+  // Output projection
+  const outY = blockY + blockH + 30;
+  svg += `<rect x="${cx-130}" y="${outY}" width="260" height="50" fill="#1A1A1A" rx="2"/>`;
+  svg += `<text x="${cx}" y="${outY+22}" text-anchor="middle" font-family="Instrument Serif, Georgia, serif" font-size="18" fill="#FFFFFF" font-style="italic">Projection finale + Softmax</text>`;
+  svg += `<text x="${cx}" y="${outY+40}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#FFFFFF" opacity="0.7" letter-spacing="0.1em">→ distribution sur le vocabulaire</text>`;
+
+  svg += arrow(cx, outY+50, cx, outY+80);
+
+  // final
+  svg += `<rect x="${cx-130}" y="${outY+80}" width="260" height="40" fill="#E85D1C" rx="2"/>`;
+  svg += `<text x="${cx}" y="${outY+105}" text-anchor="middle" font-family="Instrument Serif, Georgia, serif" font-size="18" fill="#FFFFFF" font-style="italic">Token suivant prédit</text>`;
+
+  // small annotations on the right side
+  svg += `<text x="${cx+240}" y="${blockY + blockH/2 - 30}" font-family="JetBrains Mono, monospace" font-size="10" fill="#E85D1C" opacity="0.7" letter-spacing="0.12em">↺</text>`;
+  svg += `<text x="${cx+250}" y="${blockY + blockH/2 - 12}" font-family="JetBrains Mono, monospace" font-size="9" fill="#6B6B6B" letter-spacing="0.08em">×N fois</text>`;
+
+  svg += `</svg>`;
+  root.innerHTML = svg;
+}
+buildArchitecture();
+
+/* ============================================================
+   5. AUTOREGRESSIVE GENERATION
+============================================================ */
+
+const seedText = "Paris est la capitale de";
+const generationScript = [
+  // each step: token chosen + 4 alternatives with probabilities
+  { chosen: ' la',       alts: [['la',0.78],['cette',0.09],['notre',0.05],['toute',0.04],['l\'',0.04]] },
+  { chosen: ' France',   alts: [['France',0.91],['Belgique',0.04],['nation',0.02],['République',0.02],['région',0.01]] },
+  { chosen: ',',         alts: [[',',0.55],['.',0.22],[' et',0.10],[' depuis',0.08],[' qui',0.05]] },
+  { chosen: ' une',      alts: [['une',0.42],['et',0.21],['située',0.18],['où',0.11],['ainsi',0.08]] },
+  { chosen: ' ville',    alts: [['ville',0.69],['métropole',0.13],['cité',0.09],['région',0.05],['capitale',0.04]] },
+  { chosen: ' connue',   alts: [['connue',0.48],['célèbre',0.27],['située',0.13],['mondiale',0.08],['historique',0.04]] },
+  { chosen: ' pour',     alts: [['pour',0.84],['par',0.07],['comme',0.05],['avec',0.03],['en',0.01]] },
+  { chosen: ' sa',       alts: [['sa',0.52],['ses',0.36],['son',0.07],['l\'',0.03],['leur',0.02]] },
+  { chosen: ' culture',  alts: [['culture',0.31],['gastronomie',0.27],['mode',0.18],['Tour',0.14],['histoire',0.10]] },
+  { chosen: ',',         alts: [[',',0.61],[' et',0.25],['.',0.08],[' ainsi',0.04],[' qui',0.02]] },
+  { chosen: ' son',      alts: [['son',0.49],['sa',0.30],['ses',0.15],['cette',0.04],['leur',0.02]] },
+  { chosen: ' art',      alts: [['art',0.34],['architecture',0.29],['histoire',0.19],['romantisme',0.12],['élégance',0.06]] },
+  { chosen: ' et',       alts: [['et',0.71],[',',0.18],[' ou',0.05],[' ainsi',0.04],['.',0.02]] },
+  { chosen: ' sa',       alts: [['sa',0.55],['son',0.31],['ses',0.10],['cette',0.03],['leur',0.01]] },
+  { chosen: ' Tour',     alts: [['Tour',0.43],['cuisine',0.21],['mode',0.18],['gastronomie',0.13],['Seine',0.05]] },
+  { chosen: ' Eiffel',   alts: [['Eiffel',0.96],['de',0.02],['emblématique',0.01],[',',0.005],['historique',0.005]] },
+  { chosen: '.',         alts: [['.',0.62],[',',0.18],[' emblématique',0.12],[' mondialement',0.06],[' qui',0.02]] },
+];
+
+const genText = document.getElementById('genText');
+const genCandidates = document.getElementById('genCandidates');
+const genStepBtn = document.getElementById('genStep');
+const genAutoBtn = document.getElementById('genAuto');
+const genResetBtn = document.getElementById('genReset');
+const genStepCount = document.getElementById('genStepCount');
+const genGenerated = document.getElementById('genGenerated');
+
+let genIndex = 0;
+let autoTimer = null;
+
+function renderGeneration(){
+  let html = `<span class="seed">${seedText}</span>`;
+  for(let i=0; i<genIndex; i++){
+    html += `<span class="new">${generationScript[i].chosen}</span>`;
+  }
+  if(genIndex < generationScript.length) html += `<span class="cursor"></span>`;
+  genText.innerHTML = html;
+
+  // candidates
+  if(genIndex < generationScript.length){
+    const next = generationScript[genIndex];
+    genCandidates.innerHTML = '';
+    next.alts.forEach((alt, i)=>{
+      const [w, p] = alt;
+      const isChosen = i===0;
+      const row = document.createElement('div');
+      row.className = 'candidate' + (isChosen ? ' chosen' : '');
+      row.innerHTML = `
+        <div class="word">${w}</div>
+        <div class="track"><div class="fill" style="width:0%"></div></div>
+        <div class="pct">${(p*100).toFixed(1)} %</div>
+      `;
+      genCandidates.appendChild(row);
+      setTimeout(()=>{
+        row.querySelector('.fill').style.width = (p*100)+'%';
+      }, 30+i*40);
+    });
+  } else {
+    genCandidates.innerHTML = `<div style="font-family:var(--mono);font-size:11.5px;color:var(--muted);padding:12px 0">— séquence complète, plus de tokens à générer —</div>`;
+  }
+
+  genStepCount.textContent = genIndex;
+  genGenerated.textContent = genIndex;
+  genStepBtn.disabled = genIndex >= generationScript.length;
+  if(genIndex >= generationScript.length) stopAuto();
+}
+
+function stepGen(){
+  if(genIndex < generationScript.length){
+    genIndex++;
+    renderGeneration();
+  }
+}
+function stopAuto(){
+  if(autoTimer){ clearInterval(autoTimer); autoTimer = null; genAutoBtn.textContent = 'Auto'; }
+}
+genStepBtn.addEventListener('click', stepGen);
+genAutoBtn.addEventListener('click', ()=>{
+  if(autoTimer){ stopAuto(); }
+  else {
+    genAutoBtn.textContent = 'Pause';
+    autoTimer = setInterval(()=>{
+      if(genIndex >= generationScript.length){ stopAuto(); return; }
+      stepGen();
+    }, 800);
+  }
+});
+genResetBtn.addEventListener('click', ()=>{
+  stopAuto();
+  genIndex = 0;
+  renderGeneration();
+});
+renderGeneration();
+
+/* ============================================================
+   SCROLL: progress + active rail + reveal
+============================================================ */
+
+const progressEl = document.getElementById('progress');
+const railLinks = document.querySelectorAll('nav.rail a');
+const sections = ['hero','tokens','embed','attention','archi','generate'].map(id => document.getElementById(id));
+
+function onScroll(){
+  const scrolled = window.scrollY;
+  const total = document.body.scrollHeight - window.innerHeight;
+  progressEl.style.width = (scrolled/total*100) + '%';
+
+  // active section
+  let active = sections[0].id;
+  const trigger = window.innerHeight * 0.4;
+  for(const s of sections){
+    const r = s.getBoundingClientRect();
+    if(r.top <= trigger) active = s.id;
+  }
+  railLinks.forEach(a => {
+    a.classList.toggle('active', a.dataset.section === active);
+  });
+}
+window.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+
+// reveal on scroll
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    }
+  });
+}, {threshold: 0.12});
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+</script>
+</body>
+</html>
